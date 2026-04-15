@@ -343,7 +343,7 @@ S;44`;
             const size = sizeInput.value;
             const time = parseInt(timeInput.value);
             
-            if (timeInput.value === '' || isNaN(time) || time < 1) {
+            if (isNaN(time) || time < 1) {
                 alert('Proszę podać prawidłowy czas realizacji (liczba większa od 0)');
                 return;
             }
@@ -377,7 +377,10 @@ S;44`;
         // Update table display
         function updateTable() {
             const tbody = document.getElementById('dataTableBody');
-            tbody.innerHTML = '';
+            // Clear table body safely
+            while (tbody.firstChild) {
+                tbody.removeChild(tbody.firstChild);
+            }
             
             data.forEach((item, index) => {
                 const row = tbody.insertRow();
@@ -458,7 +461,7 @@ S;44`;
             // Create histogram bins
             const binSize = 20;
             const maxTime = Math.max(...times);
-            const numBins = Math.ceil((maxTime + 1) / binSize);
+            const numBins = Math.ceil(maxTime / binSize);
             const bins = Array.from({ length: numBins }, (_, i) => i * binSize);
             
             const histogramDataS = createHistogramData(sizeData.S, bins, binSize);
