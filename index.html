@@ -185,6 +185,16 @@
         .toggle-icon.collapsed {
             transform: rotate(-90deg);
         }
+        .instructional-image-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .instructional-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -192,6 +202,9 @@
     
     <div class="data-input">
         <h2>Dodaj nowe dane</h2>
+        <div class="instructional-image-container">
+            <img src="zrzut-ekranu-dodaj-dane.svg" alt="Diagram instrukcji w 3 krokach: wybierz rozmiar (S/M/L), wpisz czas w dniach, kliknij Dodaj" class="instructional-image">
+        </div>
         <div class="input-group">
             <div class="input-field">
                 <label for="sizeInput">Rozmiar:</label>
