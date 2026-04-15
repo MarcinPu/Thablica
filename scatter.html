@@ -307,7 +307,7 @@
         }
         
         // Generate trend line points
-        function generateTrendLine(data, regression, startX, endX) {
+        function generateTrendLine(regression, startX, endX) {
             return [
                 { x: startX, y: regression.slope * startX + regression.intercept },
                 { x: endX, y: regression.slope * endX + regression.intercept }
@@ -331,6 +331,9 @@
             
             return data;
         }
+
+        // Number of recent orders to compare trends
+        const RECENT_ORDERS_COUNT = 20;
 
         // Create scatter plot
         function createScatterPlot() {
@@ -359,14 +362,14 @@
             // Calculate trends for all data
             const trendAll = linearRegression(allDataPoints);
             
-            // Calculate trends for last 20 data points
-            const last20Points = allDataPoints.slice(-20);
-            const trendLast20 = linearRegression(last20Points);
+            // Calculate trends for last N data points
+            const lastNPoints = allDataPoints.slice(-RECENT_ORDERS_COUNT);
+            const trendLast20 = linearRegression(lastNPoints);
             
             // Generate trend lines
-            const trendLineAll = generateTrendLine(allDataPoints, trendAll, 1, data.length);
-            const startXLast20 = data.length - 19; // Last 20 means starting from this point
-            const trendLineLast20 = generateTrendLine(last20Points, trendLast20, startXLast20, data.length);
+            const trendLineAll = generateTrendLine(trendAll, 1, data.length);
+            const startXLast20 = data.length - (RECENT_ORDERS_COUNT - 1); // Last N means starting from this point
+            const trendLineLast20 = generateTrendLine(trendLast20, startXLast20, data.length);
             
             // Calculate percentiles
             const times = data.map(d => d.time);
@@ -378,9 +381,8 @@
             const mean = times.reduce((a, b) => a + b, 0) / times.length;
             
             // Calculate averages for comparison
-            const avgAll = mean;
-            const timesLast20 = allDataPoints.slice(-20).map(p => p.y);
-            const avgLast20 = timesLast20.reduce((a, b) => a + b, 0) / timesLast20.length;
+            const timesLastN = allDataPoints.slice(-RECENT_ORDERS_COUNT).map(p => p.y);
+            const avgLastN = timesLastN.reduce((a, b) => a + b, 0) / timesLastN.length;
             
             // Update statistics
             document.getElementById('total').textContent = data.length;
@@ -392,9 +394,10 @@
             // Update trend comparison statistics
             document.getElementById('trendAll').textContent = trendAll.slope.toFixed(3) + ' dni/zlecenie';
             document.getElementById('trendLast20').textContent = trendLast20.slope.toFixed(3) + ' dni/zlecenie';
-            document.getElementById('avgAll').textContent = avgAll.toFixed(2) + ' dni';
-            document.getElementById('avgLast20').textContent = avgLast20.toFixed(2) + ' dni';
+            document.getElementById('avgAll').textContent = mean.toFixed(2) + ' dni';
+            document.getElementById('avgLast20').textContent = avgLastN.toFixed(2) + ' dni';
             
+            // Negative slope means improvement (delivery time decreasing over time)
             const trendDiff = trendLast20.slope - trendAll.slope;
             const trendDiffText = trendDiff > 0 
                 ? '+' + trendDiff.toFixed(3) + ' (pogorszenie)'
