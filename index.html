@@ -160,8 +160,9 @@ S;44`;
         });
 
         // Calculate statistics
-        const times = data.map(d => d.time).sort((a, b) => a - b);
+        const times = data.map(d => d.time);
         const mean = times.reduce((a, b) => a + b, 0) / times.length;
+        const sortedTimes = [...times].sort((a, b) => a - b);
         
         function percentile(arr, p) {
             const index = (p / 100) * (arr.length - 1);
@@ -172,9 +173,9 @@ S;44`;
             return arr[lower] * (1 - weight) + arr[upper] * weight;
         }
         
-        const p50 = percentile(times, 50);
-        const p80 = percentile(times, 80);
-        const p95 = percentile(times, 95);
+        const p50 = percentile(sortedTimes, 50);
+        const p80 = percentile(sortedTimes, 80);
+        const p95 = percentile(sortedTimes, 95);
 
         // Display statistics
         document.getElementById('mean').textContent = mean.toFixed(2) + ' dni';
@@ -193,15 +194,17 @@ S;44`;
         // Create histogram bins
         const binSize = 20;
         const maxTime = Math.max(...times);
-        const numBins = Math.ceil(maxTime / binSize);
+        const numBins = Math.ceil((maxTime + 1) / binSize);
         const bins = Array.from({ length: numBins }, (_, i) => i * binSize);
         
         // Count occurrences in each bin for each size
         function createHistogramData(times, bins, binSize) {
             const counts = new Array(bins.length).fill(0);
             times.forEach(time => {
-                const binIndex = Math.min(Math.floor(time / binSize), bins.length - 1);
-                counts[binIndex]++;
+                const binIndex = Math.floor(time / binSize);
+                if (binIndex >= 0 && binIndex < bins.length) {
+                    counts[binIndex]++;
+                }
             });
             return counts;
         }
