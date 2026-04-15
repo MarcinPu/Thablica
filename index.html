@@ -1,1 +1,335 @@
-ojojojo
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histogram czasów realizacji</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .chart-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stats {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stats h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        .stat-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .stat-value {
+            color: #2196F3;
+            font-weight: bold;
+        }
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Histogram czasów realizacji</h1>
+    
+    <div class="chart-container">
+        <canvas id="histogramChart"></canvas>
+    </div>
+    
+    <div class="stats">
+        <h2>Statystyki</h2>
+        <div class="stat-item">
+            <span class="stat-label">Średnia (Mean):</span>
+            <span class="stat-value" id="mean">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">50. percentyl (Mediana):</span>
+            <span class="stat-value" id="p50">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">80. percentyl:</span>
+            <span class="stat-value" id="p80">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">95. percentyl:</span>
+            <span class="stat-value" id="p95">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Całkowita liczba zleceń:</span>
+            <span class="stat-value" id="total">-</span>
+        </div>
+    </div>
+
+    <script>
+        // Parse CSV data
+        const csvData = `Deklarowany rozmiar;Czas realizacji
+S;49
+S;48
+S;87
+M;57
+M;148
+S;53
+S;45
+M;145
+L;105
+S;5
+L;163
+S;43
+M;415
+L;123
+M;103
+L;104
+L;302
+L;158
+L;98
+S;52
+M;95
+S;70
+M;95
+M;101
+M;57
+M;57
+S;53
+L;137
+S;73
+M;60
+S;126
+M;57
+L;124
+M;75
+M;89
+S;44`;
+
+        // Parse CSV
+        const lines = csvData.trim().split('\n');
+        const data = lines.slice(1).map(line => {
+            const [size, time] = line.split(';');
+            return { size: size, time: parseInt(time) };
+        });
+
+        // Calculate statistics
+        const times = data.map(d => d.time).sort((a, b) => a - b);
+        const mean = times.reduce((a, b) => a + b, 0) / times.length;
+        
+        function percentile(arr, p) {
+            const index = (p / 100) * (arr.length - 1);
+            const lower = Math.floor(index);
+            const upper = Math.ceil(index);
+            const weight = index % 1;
+            if (lower === upper) return arr[lower];
+            return arr[lower] * (1 - weight) + arr[upper] * weight;
+        }
+        
+        const p50 = percentile(times, 50);
+        const p80 = percentile(times, 80);
+        const p95 = percentile(times, 95);
+
+        // Display statistics
+        document.getElementById('mean').textContent = mean.toFixed(2) + ' dni';
+        document.getElementById('p50').textContent = p50.toFixed(2) + ' dni';
+        document.getElementById('p80').textContent = p80.toFixed(2) + ' dni';
+        document.getElementById('p95').textContent = p95.toFixed(2) + ' dni';
+        document.getElementById('total').textContent = data.length;
+
+        // Group data by size for different colors
+        const sizeData = {
+            'S': data.filter(d => d.size === 'S').map(d => d.time),
+            'M': data.filter(d => d.size === 'M').map(d => d.time),
+            'L': data.filter(d => d.size === 'L').map(d => d.time)
+        };
+
+        // Create histogram bins
+        const binSize = 20;
+        const maxTime = Math.max(...times);
+        const numBins = Math.ceil(maxTime / binSize);
+        const bins = Array.from({ length: numBins }, (_, i) => i * binSize);
+        
+        // Count occurrences in each bin for each size
+        function createHistogramData(times, bins, binSize) {
+            const counts = new Array(bins.length).fill(0);
+            times.forEach(time => {
+                const binIndex = Math.min(Math.floor(time / binSize), bins.length - 1);
+                counts[binIndex]++;
+            });
+            return counts;
+        }
+
+        const histogramDataS = createHistogramData(sizeData.S, bins, binSize);
+        const histogramDataM = createHistogramData(sizeData.M, bins, binSize);
+        const histogramDataL = createHistogramData(sizeData.L, bins, binSize);
+
+        // Create labels for bins
+        const labels = bins.map(bin => `${bin}-${bin + binSize}`);
+
+        // Create chart
+        const ctx = document.getElementById('histogramChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Rozmiar S',
+                        data: histogramDataS,
+                        backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                        borderColor: 'rgba(76, 175, 80, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Rozmiar M',
+                        data: histogramDataM,
+                        backgroundColor: 'rgba(255, 152, 0, 0.7)',
+                        borderColor: 'rgba(255, 152, 0, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Rozmiar L',
+                        data: histogramDataL,
+                        backgroundColor: 'rgba(244, 67, 54, 0.7)',
+                        borderColor: 'rgba(244, 67, 54, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Czas realizacji (dni)',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        stacked: true
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Liczba zleceń',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Histogram czasów realizacji z podziałem na rozmiary',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    annotation: {
+                        annotations: {
+                            mean: {
+                                type: 'line',
+                                xMin: mean / binSize - 0.5,
+                                xMax: mean / binSize - 0.5,
+                                borderColor: 'rgb(0, 0, 255)',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                label: {
+                                    content: `Średnia: ${mean.toFixed(2)}`,
+                                    enabled: true,
+                                    position: 'start'
+                                }
+                            },
+                            p50: {
+                                type: 'line',
+                                xMin: p50 / binSize - 0.5,
+                                xMax: p50 / binSize - 0.5,
+                                borderColor: 'rgb(75, 192, 192)',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                label: {
+                                    content: `50%: ${p50.toFixed(2)}`,
+                                    enabled: true,
+                                    position: 'start'
+                                }
+                            },
+                            p80: {
+                                type: 'line',
+                                xMin: p80 / binSize - 0.5,
+                                xMax: p80 / binSize - 0.5,
+                                borderColor: 'rgb(255, 159, 64)',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                label: {
+                                    content: `80%: ${p80.toFixed(2)}`,
+                                    enabled: true,
+                                    position: 'start'
+                                }
+                            },
+                            p95: {
+                                type: 'line',
+                                xMin: p95 / binSize - 0.5,
+                                xMax: p95 / binSize - 0.5,
+                                borderColor: 'rgb(255, 99, 132)',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                label: {
+                                    content: `95%: ${p95.toFixed(2)}`,
+                                    enabled: true,
+                                    position: 'start'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
