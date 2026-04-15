@@ -164,6 +164,30 @@
             <span class="stat-label">95. percentyl:</span>
             <span class="stat-value" id="p95">-</span>
         </div>
+    </div>
+    
+    <div class="stats">
+        <h2>Porównanie Trendów</h2>
+        <div class="stat-item">
+            <span class="stat-label">Trend - cały okres (nachylenie):</span>
+            <span class="stat-value" id="trendAll">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Trend - ostatnie 20 zleceń (nachylenie):</span>
+            <span class="stat-value" id="trendLast20">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Średnia - cały okres:</span>
+            <span class="stat-value" id="avgAll">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Średnia - ostatnie 20 zleceń:</span>
+            <span class="stat-value" id="avgLast20">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Różnica w trendzie:</span>
+            <span class="stat-value" id="trendDifference">-</span>
+        </div>
         <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #054C8E;">
             <p style="font-size: 12px; color: #1D1D1B; margin: 5px 0;"><strong>Legenda rozmiarów:</strong></p>
             <div class="legend-item">
@@ -177,6 +201,15 @@
             <div class="legend-item">
                 <span class="legend-color" style="background-color: rgba(228, 34, 41, 0.7);"></span>
                 <span>L (Large) - czerwony</span>
+            </div>
+            <p style="font-size: 12px; color: #1D1D1B; margin: 15px 0 5px 0;"><strong>Legenda trendów:</strong></p>
+            <div class="legend-item">
+                <span style="display: inline-block; width: 30px; height: 3px; background-color: rgba(128, 0, 128, 0.8); margin-right: 5px; vertical-align: middle; border: 1px dashed rgba(128, 0, 128, 0.8);"></span>
+                <span>Trend - cały okres (fioletowy)</span>
+            </div>
+            <div class="legend-item">
+                <span style="display: inline-block; width: 30px; height: 3px; background-color: rgba(255, 165, 0, 0.9); margin-right: 5px; vertical-align: middle; border: 1px dashed rgba(255, 165, 0, 0.9);"></span>
+                <span>Trend - ostatnie 20 (pomarańczowy)</span>
             </div>
         </div>
     </div>
@@ -253,6 +286,34 @@
             return arr[lower] * (1 - weight) + arr[upper] * weight;
         }
 
+        // Calculate linear regression (trend line)
+        function linearRegression(data) {
+            const n = data.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            
+            data.forEach((point, index) => {
+                const x = index + 1; // Sequential order
+                const y = point.y;
+                sumX += x;
+                sumY += y;
+                sumXY += x * y;
+                sumX2 += x * x;
+            });
+            
+            const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            
+            return { slope, intercept };
+        }
+        
+        // Generate trend line points
+        function generateTrendLine(data, regression, startX, endX) {
+            return [
+                { x: startX, y: regression.slope * startX + regression.intercept },
+                { x: endX, y: regression.slope * endX + regression.intercept }
+            ];
+        }
+
         // Parse CSV data
         function parseCSV() {
             const lines = csvData.trim().split('\n');
@@ -282,13 +343,30 @@
                 'L': []
             };
             
+            // Create flat array for trend calculation
+            const allDataPoints = [];
+            
             data.forEach((item, index) => {
-                sizeData[item.size].push({
+                const point = {
                     x: index + 1,  // Sequential order
                     y: item.time,
                     date: item.date
-                });
+                };
+                sizeData[item.size].push(point);
+                allDataPoints.push(point);
             });
+            
+            // Calculate trends for all data
+            const trendAll = linearRegression(allDataPoints);
+            
+            // Calculate trends for last 20 data points
+            const last20Points = allDataPoints.slice(-20);
+            const trendLast20 = linearRegression(last20Points);
+            
+            // Generate trend lines
+            const trendLineAll = generateTrendLine(allDataPoints, trendAll, 1, data.length);
+            const startXLast20 = data.length - 19; // Last 20 means starting from this point
+            const trendLineLast20 = generateTrendLine(last20Points, trendLast20, startXLast20, data.length);
             
             // Calculate percentiles
             const times = data.map(d => d.time);
@@ -299,12 +377,29 @@
             const p95 = percentile(sortedTimes, 95);
             const mean = times.reduce((a, b) => a + b, 0) / times.length;
             
+            // Calculate averages for comparison
+            const avgAll = mean;
+            const timesLast20 = allDataPoints.slice(-20).map(p => p.y);
+            const avgLast20 = timesLast20.reduce((a, b) => a + b, 0) / timesLast20.length;
+            
             // Update statistics
             document.getElementById('total').textContent = data.length;
             document.getElementById('mean').textContent = mean.toFixed(2) + ' dni';
             document.getElementById('p50').textContent = p50.toFixed(2) + ' dni';
             document.getElementById('p80').textContent = p80.toFixed(2) + ' dni';
             document.getElementById('p95').textContent = p95.toFixed(2) + ' dni';
+            
+            // Update trend comparison statistics
+            document.getElementById('trendAll').textContent = trendAll.slope.toFixed(3) + ' dni/zlecenie';
+            document.getElementById('trendLast20').textContent = trendLast20.slope.toFixed(3) + ' dni/zlecenie';
+            document.getElementById('avgAll').textContent = avgAll.toFixed(2) + ' dni';
+            document.getElementById('avgLast20').textContent = avgLast20.toFixed(2) + ' dni';
+            
+            const trendDiff = trendLast20.slope - trendAll.slope;
+            const trendDiffText = trendDiff > 0 
+                ? '+' + trendDiff.toFixed(3) + ' (pogorszenie)'
+                : trendDiff.toFixed(3) + ' (poprawa)';
+            document.getElementById('trendDifference').textContent = trendDiffText;
             
             // Create chart
             const ctx = document.getElementById('scatterChart').getContext('2d');
@@ -335,6 +430,30 @@
                             borderColor: 'rgba(228, 34, 41, 1)',
                             pointRadius: 6,
                             pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Trend - cały okres',
+                            data: trendLineAll,
+                            type: 'line',
+                            borderColor: 'rgba(128, 0, 128, 0.8)',
+                            backgroundColor: 'rgba(128, 0, 128, 0.1)',
+                            borderWidth: 3,
+                            borderDash: [10, 5],
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0
+                        },
+                        {
+                            label: 'Trend - ostatnie 20',
+                            data: trendLineLast20,
+                            type: 'line',
+                            borderColor: 'rgba(255, 165, 0, 0.9)',
+                            backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                            borderWidth: 3,
+                            borderDash: [5, 3],
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0
                         }
                     ]
                 },
