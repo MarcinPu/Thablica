@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Histogram czasów realizacji</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -81,19 +81,34 @@
         </div>
         <div class="stat-item">
             <span class="stat-label">50. percentyl (Mediana):</span>
-            <span class="stat-value" id="p50">-</span>
+            <span class="stat-value" id="p50" style="color: #4BC0C0;">-</span>
         </div>
         <div class="stat-item">
             <span class="stat-label">80. percentyl:</span>
-            <span class="stat-value" id="p80">-</span>
+            <span class="stat-value" id="p80" style="color: #FF9F40;">-</span>
         </div>
         <div class="stat-item">
             <span class="stat-label">95. percentyl:</span>
-            <span class="stat-value" id="p95">-</span>
+            <span class="stat-value" id="p95" style="color: #FF6384;">-</span>
         </div>
         <div class="stat-item">
             <span class="stat-label">Całkowita liczba zleceń:</span>
             <span class="stat-value" id="total">-</span>
+        </div>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
+            <p style="font-size: 12px; color: #666; margin: 5px 0;"><strong>Legenda rozmiarów:</strong></p>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: rgba(76, 175, 80, 0.7);"></span>
+                <span>S (Small) - zielony</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: rgba(255, 152, 0, 0.7);"></span>
+                <span>M (Medium) - pomarańczowy</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: rgba(244, 67, 54, 0.7);"></span>
+                <span>L (Large) - czerwony</span>
+            </div>
         </div>
     </div>
 
@@ -270,62 +285,6 @@ S;44`;
                     legend: {
                         display: true,
                         position: 'top'
-                    },
-                    annotation: {
-                        annotations: {
-                            mean: {
-                                type: 'line',
-                                xMin: mean / binSize - 0.5,
-                                xMax: mean / binSize - 0.5,
-                                borderColor: 'rgb(0, 0, 255)',
-                                borderWidth: 2,
-                                borderDash: [5, 5],
-                                label: {
-                                    content: `Średnia: ${mean.toFixed(2)}`,
-                                    enabled: true,
-                                    position: 'start'
-                                }
-                            },
-                            p50: {
-                                type: 'line',
-                                xMin: p50 / binSize - 0.5,
-                                xMax: p50 / binSize - 0.5,
-                                borderColor: 'rgb(75, 192, 192)',
-                                borderWidth: 2,
-                                borderDash: [5, 5],
-                                label: {
-                                    content: `50%: ${p50.toFixed(2)}`,
-                                    enabled: true,
-                                    position: 'start'
-                                }
-                            },
-                            p80: {
-                                type: 'line',
-                                xMin: p80 / binSize - 0.5,
-                                xMax: p80 / binSize - 0.5,
-                                borderColor: 'rgb(255, 159, 64)',
-                                borderWidth: 2,
-                                borderDash: [5, 5],
-                                label: {
-                                    content: `80%: ${p80.toFixed(2)}`,
-                                    enabled: true,
-                                    position: 'start'
-                                }
-                            },
-                            p95: {
-                                type: 'line',
-                                xMin: p95 / binSize - 0.5,
-                                xMax: p95 / binSize - 0.5,
-                                borderColor: 'rgb(255, 99, 132)',
-                                borderWidth: 2,
-                                borderDash: [5, 5],
-                                label: {
-                                    content: `95%: ${p95.toFixed(2)}`,
-                                    enabled: true,
-                                    position: 'start'
-                                }
-                            }
-                        }
                     }
                 }
             }
