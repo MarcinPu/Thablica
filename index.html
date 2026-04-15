@@ -213,8 +213,8 @@
         </div>
         
         <div class="table-container collapsed" id="tableContainer">
-            <div class="toggle-details" onclick="toggleTableDetails()">
-                <strong>Szczegóły danych (<span id="dataCount">0</span> wpisów)</strong>
+            <div class="toggle-details" onclick="toggleTableDetails()" onkeypress="handleToggleKeyPress(event)" role="button" tabindex="0">
+                <strong>Szczegóły danych (<span id="dataCount">0</span> <span id="dataCountLabel">wpisów</span>)</strong>
                 <span class="toggle-icon collapsed" id="toggleIcon">▼</span>
             </div>
             <table class="data-table" id="dataTable">
@@ -440,6 +440,14 @@ S;44`;
             
             // Update data count
             document.getElementById('dataCount').textContent = data.length;
+            
+            // Update grammatical form for Polish
+            const countLabel = document.getElementById('dataCountLabel');
+            if (data.length === 1) {
+                countLabel.textContent = 'wpis';
+            } else {
+                countLabel.textContent = 'wpisów';
+            }
         }
 
         // Toggle table details visibility
@@ -449,6 +457,14 @@ S;44`;
             
             container.classList.toggle('collapsed');
             icon.classList.toggle('collapsed');
+        }
+
+        // Handle keyboard events for toggle button
+        function handleToggleKeyPress(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggleTableDetails();
+            }
         }
 
         // Update all displays (chart, stats, table)
