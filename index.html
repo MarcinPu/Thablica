@@ -176,7 +176,7 @@
             </div>
             <div class="input-field">
                 <label for="timeInput">Czas realizacji (dni):</label>
-                <input type="number" id="timeInput" min="1" placeholder="np. 50">
+                <input type="number" id="timeInput" min="1" step="1" placeholder="np. 50">
             </div>
         </div>
         <div class="button-group">
@@ -344,7 +344,7 @@ S;44`;
             const time = parseInt(timeInput.value);
             
             if (isNaN(time) || time < 1) {
-                alert('Proszę podać prawidłowy czas realizacji (liczba większa od 0)');
+                alert('Proszę podać prawidłowy czas realizacji (liczba całkowita większa lub równa 1)');
                 return;
             }
             
@@ -461,6 +461,7 @@ S;44`;
             // Create histogram bins
             const binSize = 20;
             const maxTime = Math.max(...times);
+            // Add 1 to ensure maxTime is included in the last bin
             const numBins = Math.ceil((maxTime + 1) / binSize);
             const bins = Array.from({ length: numBins }, (_, i) => i * binSize);
             
