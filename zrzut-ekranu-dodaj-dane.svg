@@ -1,4 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300" style="background: #f8f9fa; border-radius: 8px;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300">
+  <!-- Background -->
+  <rect width="600" height="300" fill="#f8f9fa" rx="8"/>
+  
   <!-- Title -->
   <text x="300" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">
     Jak dodać nowe dane?
@@ -30,10 +33,10 @@
   </g>
   
   <!-- Input field illustration 2 -->
-  <rect x="60" y="180" width="200" height="35" fill="white" stroke="#ccc" stroke-width="1" rx="4"/>
+  <rect x="60" y="180" width="200" height="50" fill="white" stroke="#ccc" stroke-width="1" rx="4"/>
   <text x="70" y="198" font-family="Arial, sans-serif" font-size="12" fill="#666">Czas realizacji (dni):</text>
-  <rect x="60" y="200" width="120" height="20" fill="white" stroke="#999" stroke-width="1" rx="3"/>
-  <text x="70" y="214" font-family="Arial, sans-serif" font-size="12" fill="#333">50</text>
+  <rect x="70" y="205" width="120" height="20" fill="white" stroke="#999" stroke-width="1" rx="3"/>
+  <text x="80" y="219" font-family="Arial, sans-serif" font-size="12" fill="#333">50</text>
   
   <!-- Step 3 -->
   <g>
