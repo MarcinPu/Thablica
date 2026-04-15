@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scatterplot czasów realizacji</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        
+        .logo {
+            max-height: 80px;
+            width: auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin: 0;
+        }
+        
+        .nav {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .nav a {
+            color: #4BC0C0;
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid #4BC0C0;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .nav a:hover {
+            background-color: #4BC0C0;
+            color: #1a1a1a;
+        }
+        
+        .chart-container {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        
+        .stats {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .stats h2 {
+            margin-top: 0;
+            color: #ffffff;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #444;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            font-weight: bold;
+            color: #b0b0b0;
+        }
+        
+        .stat-value {
+            color: #4BC0C0;
+            font-weight: bold;
+        }
+        
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="2.jpg.png" alt="Logo" class="logo">
+        <h1>Scatterplot czasów realizacji</h1>
+    </div>
+    
+    <div class="nav">
+        <a href="index.html">← Powrót do Histogramu</a>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="scatterChart"></canvas>
+    </div>
+    
+    <div class="stats">
+        <h2>Statystyki i Percentyle</h2>
+        <div class="stat-item">
+            <span class="stat-label">Liczba zleceń:</span>
+            <span class="stat-value" id="total">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Średnia (Mean):</span>
+            <span class="stat-value" id="mean">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">50. percentyl (Mediana):</span>
+            <span class="stat-value" id="p50" style="color: #4BC0C0;">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">80. percentyl:</span>
+            <span class="stat-value" id="p80" style="color: #FF9F40;">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">95. percentyl:</span>
+            <span class="stat-value" id="p95" style="color: #FF6384;">-</span>
+        </div>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #444;">
+            <p style="font-size: 12px; color: #b0b0b0; margin: 5px 0;"><strong>Legenda rozmiarów:</strong></p>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: rgba(76, 175, 80, 0.7);"></span>
+                <span>S (Small) - zielony</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: rgba(255, 152, 0, 0.7);"></span>
+                <span>M (Medium) - pomarańczowy</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: rgba(244, 67, 54, 0.7);"></span>
+                <span>L (Large) - czerwony</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CSV data from the file
+        const csvData = `Data ukończenia;Deklarowany rozmiar;Czas realizacji
+15.07.2024;S;49
+22.08.2024;S;48
+10.09.2024;S;87
+25.09.2024;M;57
+5.10.2024;M;148
+14.10.2024;S;53
+28.10.2024;S;45
+18.11.2024;M;145
+4.12.2024;L;105
+8.01.2025;S;5
+20.01.2025;L;163
+14.02.2025;S;43
+26.02.2025;M;415
+15.03.2025;L;123
+10.04.2025;M;103
+5.05.2025;L;104
+12.06.2025;L;302
+25.06.2025;L;158
+2.07.2025;L;98
+11.07.2025;S;52
+18.07.2025;M;95
+29.07.2025;S;70
+3.08.2025;M;95
+14.08.2025;M;101
+21.08.2025;M;57
+29.08.2025;M;57
+8.09.2025;S;53
+22.09.2025;L;137
+4.10.2025;S;73
+12.10.2025;M;60
+19.10.2025;S;126
+27.10.2025;M;57
+5.11.2025;L;124
+15.11.2025;M;75
+25.11.2025;M;89
+10.12.2025;S;44`;
+
+        let chart = null;
+
+        // Parse date from DD.MM.YYYY format
+        function parseDate(dateStr) {
+            const [day, month, year] = dateStr.split('.');
+            return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        }
+
+        // Helper function for percentile calculation
+        function percentile(arr, p) {
+            const index = (p / 100) * (arr.length - 1);
+            const lower = Math.floor(index);
+            const upper = Math.ceil(index);
+            const weight = index % 1;
+            if (lower === upper) return arr[lower];
+            return arr[lower] * (1 - weight) + arr[upper] * weight;
+        }
+
+        // Parse CSV data
+        function parseCSV() {
+            const lines = csvData.trim().split('\n');
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].split(';');
+                if (parts.length >= 3) {
+                    const date = parseDate(parts[0]);
+                    const size = parts[1];
+                    const time = parseInt(parts[2]);
+                    data.push({ date, size, time });
+                }
+            }
+            
+            return data;
+        }
+
+        // Create scatter plot
+        function createScatterPlot() {
+            const data = parseCSV();
+            
+            // Group data by size
+            const sizeData = {
+                'S': [],
+                'M': [],
+                'L': []
+            };
+            
+            data.forEach((item, index) => {
+                sizeData[item.size].push({
+                    x: index + 1,  // Sequential order
+                    y: item.time,
+                    date: item.date
+                });
+            });
+            
+            // Calculate percentiles
+            const times = data.map(d => d.time);
+            const sortedTimes = [...times].sort((a, b) => a - b);
+            
+            const p50 = percentile(sortedTimes, 50);
+            const p80 = percentile(sortedTimes, 80);
+            const p95 = percentile(sortedTimes, 95);
+            const mean = times.reduce((a, b) => a + b, 0) / times.length;
+            
+            // Update statistics
+            document.getElementById('total').textContent = data.length;
+            document.getElementById('mean').textContent = mean.toFixed(2) + ' dni';
+            document.getElementById('p50').textContent = p50.toFixed(2) + ' dni';
+            document.getElementById('p80').textContent = p80.toFixed(2) + ' dni';
+            document.getElementById('p95').textContent = p95.toFixed(2) + ' dni';
+            
+            // Create chart
+            const ctx = document.getElementById('scatterChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Rozmiar S',
+                            data: sizeData.S,
+                            backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                            borderColor: 'rgba(76, 175, 80, 1)',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Rozmiar M',
+                            data: sizeData.M,
+                            backgroundColor: 'rgba(255, 152, 0, 0.7)',
+                            borderColor: 'rgba(255, 152, 0, 1)',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Rozmiar L',
+                            data: sizeData.L,
+                            backgroundColor: 'rgba(244, 67, 54, 0.7)',
+                            borderColor: 'rgba(244, 67, 54, 1)',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Numer zlecenia',
+                                color: '#e0e0e0',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Czas realizacji (dni)',
+                                color: '#e0e0e0',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Scatterplot czasów realizacji z liniami percentyli',
+                            color: '#ffffff',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    yMin: p50,
+                                    yMax: p50,
+                                    borderColor: '#4BC0C0',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        display: true,
+                                        content: '50. percentyl (' + p50.toFixed(0) + ' dni)',
+                                        position: 'end',
+                                        backgroundColor: '#4BC0C0',
+                                        color: '#1a1a1a'
+                                    }
+                                },
+                                line2: {
+                                    type: 'line',
+                                    yMin: p80,
+                                    yMax: p80,
+                                    borderColor: '#FF9F40',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        display: true,
+                                        content: '80. percentyl (' + p80.toFixed(0) + ' dni)',
+                                        position: 'end',
+                                        backgroundColor: '#FF9F40',
+                                        color: '#1a1a1a'
+                                    }
+                                },
+                                line3: {
+                                    type: 'line',
+                                    yMin: p95,
+                                    yMax: p95,
+                                    borderColor: '#FF6384',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        display: true,
+                                        content: '95. percentyl (' + p95.toFixed(0) + ' dni)',
+                                        position: 'end',
+                                        backgroundColor: '#FF6384',
+                                        color: '#1a1a1a'
+                                    }
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.parsed.y;
+                                    return label + ': ' + value + ' dni';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            createScatterPlot();
+        });
+    </script>
+    
+    <!-- Chart.js Annotation Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1"></script>
+</body>
+</html>
