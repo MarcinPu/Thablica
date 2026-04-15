@@ -163,6 +163,9 @@
         </div>
     </div>
 
+    <!-- Chart.js Annotation Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1"></script>
+
     <script>
         // CSV data from the file
         const csvData = `Data ukończenia;Deklarowany rozmiar;Czas realizacji
@@ -207,8 +210,19 @@
 
         // Parse date from DD.MM.YYYY format
         function parseDate(dateStr) {
-            const [day, month, year] = dateStr.split('.');
-            return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            const parts = dateStr.split('.');
+            if (parts.length !== 3) {
+                console.warn('Invalid date format:', dateStr);
+                return new Date();
+            }
+            const day = parseInt(parts[0]);
+            const month = parseInt(parts[1]);
+            const year = parseInt(parts[2]);
+            if (isNaN(day) || isNaN(month) || isNaN(year)) {
+                console.warn('Invalid date values:', dateStr);
+                return new Date();
+            }
+            return new Date(year, month - 1, day);
         }
 
         // Helper function for percentile calculation
@@ -430,8 +444,5 @@
             createScatterPlot();
         });
     </script>
-    
-    <!-- Chart.js Annotation Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1"></script>
 </body>
 </html>
