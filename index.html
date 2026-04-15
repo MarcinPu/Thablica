@@ -8,47 +8,76 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0;
             background-color: #f5f5f5;
+            color: #1D1D1B;
         }
+        
+        .header {
+            background-color: #054C8E;
+            color: white;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(5, 76, 142, 0.2);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            max-height: 80px;
+            width: auto;
+        }
+        
         h1 {
             text-align: center;
-            color: #333;
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
         }
         .chart-container {
-            background-color: white;
-            padding: 20px;
+            background-color: #ffffff;
+            padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 20px 30px 20px;
         }
         .stats {
-            background-color: white;
-            padding: 20px;
+            background-color: #ffffff;
+            padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 20px 30px 20px;
         }
         .stats h2 {
             margin-top: 0;
-            color: #333;
+            color: #054C8E;
+            border-bottom: 3px solid #054C8E;
+            padding-bottom: 10px;
         }
         .stat-item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
         }
         .stat-item:last-child {
             border-bottom: none;
         }
         .stat-label {
             font-weight: bold;
-            color: #555;
+            color: #1D1D1B;
         }
         .stat-value {
-            color: #2196F3;
+            color: #054C8E;
             font-weight: bold;
         }
         .legend-item {
@@ -65,15 +94,17 @@
             border-radius: 3px;
         }
         .data-input {
-            background-color: white;
-            padding: 20px;
+            background-color: #ffffff;
+            padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 20px 30px 20px;
         }
         .data-input h2 {
             margin-top: 0;
-            color: #333;
+            color: #054C8E;
+            border-bottom: 3px solid #054C8E;
+            padding-bottom: 10px;
         }
         .input-group {
             display: flex;
@@ -89,7 +120,7 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
-            color: #555;
+            color: #1D1D1B;
         }
         .input-field input,
         .input-field select {
@@ -110,11 +141,11 @@
             transition: background-color 0.3s;
         }
         .btn-primary {
-            background-color: #2196F3;
+            background-color: #054C8E;
             color: white;
         }
         .btn-primary:hover {
-            background-color: #1976D2;
+            background-color: #003E83;
         }
         .btn-danger {
             background-color: #f44336;
@@ -144,7 +175,7 @@
         .data-table th {
             background-color: #f5f5f5;
             font-weight: bold;
-            color: #333;
+            color: #1D1D1B;
         }
         .data-table tr:hover {
             background-color: #f9f9f9;
@@ -197,25 +228,32 @@
         }
         .nav {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            padding: 0 20px;
         }
         .nav a {
-            color: #2196F3;
+            color: #ffffff;
+            background-color: #054C8E;
             text-decoration: none;
-            padding: 8px 16px;
-            border: 1px solid #2196F3;
+            padding: 12px 24px;
             border-radius: 4px;
             transition: all 0.3s;
             display: inline-block;
+            font-weight: bold;
         }
         .nav a:hover {
-            background-color: #2196F3;
-            color: white;
+            background-color: #003E83;
+            box-shadow: 0 2px 8px rgba(5, 76, 142, 0.3);
         }
     </style>
 </head>
 <body>
-    <h1>Histogram czasów realizacji</h1>
+    <div class="header">
+        <div class="header-content">
+            <img src="2.jpg.png" alt="Logo" class="logo">
+            <h1>Histogram czasów realizacji</h1>
+        </div>
+    </div>
     
     <div class="nav">
         <a href="scatter.html">Zobacz Scatterplot →</a>
