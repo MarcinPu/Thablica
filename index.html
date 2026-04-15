@@ -213,8 +213,8 @@ S;44`;
         const histogramDataM = createHistogramData(sizeData.M, bins, binSize);
         const histogramDataL = createHistogramData(sizeData.L, bins, binSize);
 
-        // Create labels for bins
-        const labels = bins.map(bin => `${bin}-${bin + binSize}`);
+        // Create labels for bins (inclusive lower bound, exclusive upper bound)
+        const labels = bins.map(bin => `${bin}-${bin + binSize - 1}`);
 
         // Create chart
         const ctx = document.getElementById('histogramChart').getContext('2d');
