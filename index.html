@@ -158,6 +158,33 @@
             gap: 10px;
             margin-top: 10px;
         }
+        .table-container {
+            margin-top: 20px;
+        }
+        .table-container.collapsed .data-table {
+            display: none;
+        }
+        .toggle-details {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            margin-top: 15px;
+            user-select: none;
+        }
+        .toggle-details:hover {
+            background-color: #eeeeee;
+        }
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            font-size: 20px;
+        }
+        .toggle-icon.collapsed {
+            transform: rotate(-90deg);
+        }
     </style>
 </head>
 <body>
@@ -185,18 +212,24 @@
             <button class="btn btn-danger" onclick="clearAllData()">Wyczyść wszystkie dane</button>
         </div>
         
-        <table class="data-table" id="dataTable">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Rozmiar</th>
-                    <th>Czas (dni)</th>
-                    <th>Akcje</th>
-                </tr>
-            </thead>
-            <tbody id="dataTableBody">
-            </tbody>
-        </table>
+        <div class="table-container collapsed" id="tableContainer">
+            <div class="toggle-details" onclick="toggleTableDetails()">
+                <strong>Szczegóły danych (<span id="dataCount">0</span> wpisów)</strong>
+                <span class="toggle-icon collapsed" id="toggleIcon">▼</span>
+            </div>
+            <table class="data-table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Rozmiar</th>
+                        <th>Czas (dni)</th>
+                        <th>Akcje</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTableBody">
+                </tbody>
+            </table>
+        </div>
     </div>
     
     <div class="chart-container">
@@ -404,6 +437,18 @@ S;44`;
                 btnDelete.onclick = function() { deleteData(index); };
                 cellAction.appendChild(btnDelete);
             });
+            
+            // Update data count
+            document.getElementById('dataCount').textContent = data.length;
+        }
+
+        // Toggle table details visibility
+        function toggleTableDetails() {
+            const container = document.getElementById('tableContainer');
+            const icon = document.getElementById('toggleIcon');
+            
+            container.classList.toggle('collapsed');
+            icon.classList.toggle('collapsed');
         }
 
         // Update all displays (chart, stats, table)
@@ -540,7 +585,7 @@ S;44`;
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Histogram czasów realizacji z podziałem na rozmiary',
+                            text: '😊 Histogram czasów realizacji z podziałem na rozmiary 😊',
                             font: {
                                 size: 18,
                                 weight: 'bold'
