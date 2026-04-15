@@ -64,10 +64,140 @@
             vertical-align: middle;
             border-radius: 3px;
         }
+        .data-input {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .data-input h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .input-field {
+            flex: 1;
+            min-width: 150px;
+        }
+        .input-field label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .input-field input,
+        .input-field select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #2196F3;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1976D2;
+        }
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+        .btn-secondary {
+            background-color: #757575;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #616161;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .data-table th,
+        .data-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .data-table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+            color: #333;
+        }
+        .data-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <h1>Histogram czasów realizacji</h1>
+    
+    <div class="data-input">
+        <h2>Dodaj nowe dane</h2>
+        <div class="input-group">
+            <div class="input-field">
+                <label for="sizeInput">Rozmiar:</label>
+                <select id="sizeInput">
+                    <option value="S">S (Small)</option>
+                    <option value="M">M (Medium)</option>
+                    <option value="L">L (Large)</option>
+                </select>
+            </div>
+            <div class="input-field">
+                <label for="timeInput">Czas realizacji (dni):</label>
+                <input type="number" id="timeInput" min="1" placeholder="np. 50">
+            </div>
+        </div>
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="addData()">Dodaj</button>
+            <button class="btn btn-secondary" onclick="loadDefaultData()">Załaduj domyślne dane</button>
+            <button class="btn btn-danger" onclick="clearAllData()">Wyczyść wszystkie dane</button>
+        </div>
+        
+        <table class="data-table" id="dataTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Rozmiar</th>
+                    <th>Czas (dni)</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody id="dataTableBody">
+            </tbody>
+        </table>
+    </div>
     
     <div class="chart-container">
         <canvas id="histogramChart"></canvas>
@@ -113,8 +243,8 @@
     </div>
 
     <script>
-        // Parse CSV data
-        const csvData = `Deklarowany rozmiar;Czas realizacji
+        // Default CSV data
+        const defaultCsvData = `Deklarowany rozmiar;Czas realizacji
 S;49
 S;48
 S;87
@@ -152,145 +282,269 @@ M;75
 M;89
 S;44`;
 
-        // Parse CSV
-        const lines = csvData.trim().split('\n');
-        const data = lines.slice(1).map(line => {
-            const [size, time] = line.split(';');
-            return { size: size, time: parseInt(time) };
-        });
+        // Data array
+        let data = [];
+        let chart = null;
 
-        // Calculate statistics
-        const times = data.map(d => d.time);
-        const mean = times.reduce((a, b) => a + b, 0) / times.length;
-        const sortedTimes = [...times].sort((a, b) => a - b);
-        
-        function percentile(arr, p) {
-            const index = (p / 100) * (arr.length - 1);
-            const lower = Math.floor(index);
-            const upper = Math.ceil(index);
-            const weight = index % 1;
-            if (lower === upper) return arr[lower];
-            return arr[lower] * (1 - weight) + arr[upper] * weight;
+        // Load data from localStorage or use default
+        function loadData() {
+            const savedData = localStorage.getItem('histogramData');
+            if (savedData) {
+                data = JSON.parse(savedData);
+            } else {
+                loadDefaultData();
+            }
+            updateDisplay();
         }
-        
-        const p50 = percentile(sortedTimes, 50);
-        const p80 = percentile(sortedTimes, 80);
-        const p95 = percentile(sortedTimes, 95);
 
-        // Display statistics
-        document.getElementById('mean').textContent = mean.toFixed(2) + ' dni';
-        document.getElementById('p50').textContent = p50.toFixed(2) + ' dni';
-        document.getElementById('p80').textContent = p80.toFixed(2) + ' dni';
-        document.getElementById('p95').textContent = p95.toFixed(2) + ' dni';
-        document.getElementById('total').textContent = data.length;
+        // Load default CSV data
+        function loadDefaultData() {
+            const lines = defaultCsvData.trim().split('\n');
+            data = lines.slice(1).map(line => {
+                const [size, time] = line.split(';');
+                return { size: size, time: parseInt(time) };
+            });
+            saveData();
+            updateDisplay();
+        }
 
-        // Group data by size for different colors
-        const sizeData = {
-            'S': data.filter(d => d.size === 'S').map(d => d.time),
-            'M': data.filter(d => d.size === 'M').map(d => d.time),
-            'L': data.filter(d => d.size === 'L').map(d => d.time)
-        };
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('histogramData', JSON.stringify(data));
+        }
 
-        // Create histogram bins
-        const binSize = 20;
-        const maxTime = Math.max(...times);
-        const numBins = Math.ceil((maxTime + 1) / binSize);
-        const bins = Array.from({ length: numBins }, (_, i) => i * binSize);
-        
-        // Count occurrences in each bin for each size
-        function createHistogramData(times, bins, binSize) {
-            const counts = new Array(bins.length).fill(0);
-            times.forEach(time => {
-                const binIndex = Math.floor(time / binSize);
-                if (binIndex >= 0 && binIndex < bins.length) {
-                    counts[binIndex]++;
+        // Add new data entry
+        function addData() {
+            const sizeInput = document.getElementById('sizeInput');
+            const timeInput = document.getElementById('timeInput');
+            
+            const size = sizeInput.value;
+            const time = parseInt(timeInput.value);
+            
+            if (!time || time < 1) {
+                alert('Proszę podać prawidłowy czas realizacji (liczba większa od 0)');
+                return;
+            }
+            
+            data.push({ size: size, time: time });
+            saveData();
+            updateDisplay();
+            
+            // Clear input
+            timeInput.value = '';
+        }
+
+        // Delete data entry
+        function deleteData(index) {
+            if (confirm('Czy na pewno chcesz usunąć ten wpis?')) {
+                data.splice(index, 1);
+                saveData();
+                updateDisplay();
+            }
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Czy na pewno chcesz usunąć wszystkie dane?')) {
+                data = [];
+                saveData();
+                updateDisplay();
+            }
+        }
+
+        // Update table display
+        function updateTable() {
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+            
+            data.forEach((item, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${item.size}</strong></td>
+                    <td>${item.time}</td>
+                    <td><button class="btn btn-danger btn-small" onclick="deleteData(${index})">Usuń</button></td>
+                `;
+            });
+        }
+
+        // Update all displays (chart, stats, table)
+        function updateDisplay() {
+            updateTable();
+            updateStatistics();
+            updateChart();
+        }
+
+        // Calculate and update statistics
+        function updateStatistics() {
+            if (data.length === 0) {
+                document.getElementById('mean').textContent = '-';
+                document.getElementById('p50').textContent = '-';
+                document.getElementById('p80').textContent = '-';
+                document.getElementById('p95').textContent = '-';
+                document.getElementById('total').textContent = '0';
+                return;
+            }
+
+            const times = data.map(d => d.time);
+            const mean = times.reduce((a, b) => a + b, 0) / times.length;
+            const sortedTimes = [...times].sort((a, b) => a - b);
+            
+            function percentile(arr, p) {
+                const index = (p / 100) * (arr.length - 1);
+                const lower = Math.floor(index);
+                const upper = Math.ceil(index);
+                const weight = index % 1;
+                if (lower === upper) return arr[lower];
+                return arr[lower] * (1 - weight) + arr[upper] * weight;
+            }
+            
+            const p50 = percentile(sortedTimes, 50);
+            const p80 = percentile(sortedTimes, 80);
+            const p95 = percentile(sortedTimes, 95);
+
+            document.getElementById('mean').textContent = mean.toFixed(2) + ' dni';
+            document.getElementById('p50').textContent = p50.toFixed(2) + ' dni';
+            document.getElementById('p80').textContent = p80.toFixed(2) + ' dni';
+            document.getElementById('p95').textContent = p95.toFixed(2) + ' dni';
+            document.getElementById('total').textContent = data.length;
+        }
+
+        // Update chart
+        function updateChart() {
+            if (data.length === 0) {
+                if (chart) {
+                    chart.destroy();
+                    chart = null;
+                }
+                return;
+            }
+
+            const times = data.map(d => d.time);
+            
+            // Group data by size for different colors
+            const sizeData = {
+                'S': data.filter(d => d.size === 'S').map(d => d.time),
+                'M': data.filter(d => d.size === 'M').map(d => d.time),
+                'L': data.filter(d => d.size === 'L').map(d => d.time)
+            };
+
+            // Create histogram bins
+            const binSize = 20;
+            const maxTime = Math.max(...times);
+            const numBins = Math.ceil((maxTime + 1) / binSize);
+            const bins = Array.from({ length: numBins }, (_, i) => i * binSize);
+            
+            // Count occurrences in each bin for each size
+            function createHistogramData(times, bins, binSize) {
+                const counts = new Array(bins.length).fill(0);
+                times.forEach(time => {
+                    const binIndex = Math.floor(time / binSize);
+                    if (binIndex >= 0 && binIndex < bins.length) {
+                        counts[binIndex]++;
+                    }
+                });
+                return counts;
+            }
+
+            const histogramDataS = createHistogramData(sizeData.S, bins, binSize);
+            const histogramDataM = createHistogramData(sizeData.M, bins, binSize);
+            const histogramDataL = createHistogramData(sizeData.L, bins, binSize);
+
+            // Create labels for bins
+            const labels = bins.map(bin => `${bin}-${bin + binSize - 1}`);
+
+            // Destroy existing chart if it exists
+            if (chart) {
+                chart.destroy();
+            }
+
+            // Create new chart
+            const ctx = document.getElementById('histogramChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Rozmiar S',
+                            data: histogramDataS,
+                            backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                            borderColor: 'rgba(76, 175, 80, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Rozmiar M',
+                            data: histogramDataM,
+                            backgroundColor: 'rgba(255, 152, 0, 0.7)',
+                            borderColor: 'rgba(255, 152, 0, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Rozmiar L',
+                            data: histogramDataL,
+                            backgroundColor: 'rgba(244, 67, 54, 0.7)',
+                            borderColor: 'rgba(244, 67, 54, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Czas realizacji (dni)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            stacked: true
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Liczba zleceń',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Histogram czasów realizacji z podziałem na rozmiary',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
                 }
             });
-            return counts;
         }
 
-        const histogramDataS = createHistogramData(sizeData.S, bins, binSize);
-        const histogramDataM = createHistogramData(sizeData.M, bins, binSize);
-        const histogramDataL = createHistogramData(sizeData.L, bins, binSize);
-
-        // Create labels for bins (inclusive lower bound, exclusive upper bound)
-        const labels = bins.map(bin => `${bin}-${bin + binSize - 1}`);
-
-        // Create chart
-        const ctx = document.getElementById('histogramChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Rozmiar S',
-                        data: histogramDataS,
-                        backgroundColor: 'rgba(76, 175, 80, 0.7)',
-                        borderColor: 'rgba(76, 175, 80, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Rozmiar M',
-                        data: histogramDataM,
-                        backgroundColor: 'rgba(255, 152, 0, 0.7)',
-                        borderColor: 'rgba(255, 152, 0, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Rozmiar L',
-                        data: histogramDataL,
-                        backgroundColor: 'rgba(244, 67, 54, 0.7)',
-                        borderColor: 'rgba(244, 67, 54, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Czas realizacji (dni)',
-                            font: {
-                                size: 14,
-                                weight: 'bold'
-                            }
-                        },
-                        stacked: true
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Liczba zleceń',
-                            font: {
-                                size: 14,
-                                weight: 'bold'
-                            }
-                        },
-                        stacked: true,
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Histogram czasów realizacji z podziałem na rozmiary',
-                        font: {
-                            size: 18,
-                            weight: 'bold'
-                        }
-                    },
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
+        // Allow Enter key to add data
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('timeInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addData();
                 }
-            }
+            });
+            loadData();
         });
     </script>
 </body>
