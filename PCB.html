@@ -223,6 +223,7 @@
     <div class="nav">
         <a href="index.html">← Histogram</a>
         <a href="scatter.html">Scatterplot</a>
+        <a href="XMR.html">Wykres XMR</a>
     </div>
     
     <div class="greeting">
@@ -427,10 +428,10 @@
             const lnpl = Math.max(0, mean - (3 * sigmaMovingRange)); // Cannot be negative
             
             // Calculate Moving Range control limits
-            // UMRL = mR̄ + 3.27 (Upper Moving Range Limit)
-            // LMRL = mR̄ - 3.27 (Lower Moving Range Limit)
-            const umrl = avgMovingRange + 3.27;
-            const lmrl = Math.max(0, avgMovingRange - 3.27); // Cannot be negative
+            // UMRL = mR̄ * 3.27 (Upper Moving Range Limit)
+            // LMRL = mR̄ / 3.27 (Lower Moving Range Limit)
+            const umrl = avgMovingRange * 3.27;
+            const lmrl = Math.max(0, avgMovingRange / 3.27); // Cannot be negative
             
             return {
                 count: values.length,
@@ -710,7 +711,7 @@
                                     borderWidth: 2,
                                     borderDash: [5, 5],
                                     label: {
-                                        content: `UMRL: ${stats.umrl.toFixed(2)} (mR̄ + 3.27)`,
+                                        content: `UMRL: ${stats.umrl.toFixed(2)} (mR̄ × 3.27)`,
                                         enabled: true,
                                         position: 'end',
                                         backgroundColor: 'rgba(255, 99, 132, 0.8)',
@@ -728,7 +729,7 @@
                                     borderWidth: 2,
                                     borderDash: [5, 5],
                                     label: {
-                                        content: `LMRL: ${stats.lmrl.toFixed(2)} (mR̄ - 3.27)`,
+                                        content: `LMRL: ${stats.lmrl.toFixed(2)} (mR̄ ÷ 3.27)`,
                                         enabled: true,
                                         position: 'start',
                                         backgroundColor: 'rgba(54, 162, 235, 0.8)',
