@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wykres XMR - Tempo dostarczania dzienne</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #1D1D1B;
+        }
+        
+        .header {
+            background-color: #054C8E;
+            color: white;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(5, 76, 142, 0.2);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            max-height: 80px;
+            width: auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+        }
+        
+        .nav {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+        
+        .nav a {
+            color: #ffffff;
+            background-color: #054C8E;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            display: inline-block;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        
+        .nav a:hover {
+            background-color: #003E83;
+            box-shadow: 0 2px 8px rgba(5, 76, 142, 0.3);
+        }
+        
+        .chart-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 20px 30px 20px;
+        }
+        
+        .stats {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 20px 30px 20px;
+        }
+        
+        .stats h2 {
+            margin-top: 0;
+            color: #054C8E;
+            border-bottom: 3px solid #054C8E;
+            padding-bottom: 10px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            font-weight: bold;
+            color: #1D1D1B;
+        }
+        
+        .stat-value {
+            color: #054C8E;
+            font-weight: bold;
+        }
+        
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <img src="2.jpg.png" alt="Logo" class="logo">
+            <h1>Wykres XMR - Tempo dostarczania dzienne</h1>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <a href="index.html">Histogram</a>
+        <a href="scatter.html">Scatterplot</a>
+        <a href="PCB.html">Wykres X (PCB)</a>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="xChart"></canvas>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="mrChart"></canvas>
+    </div>
+    
+    <div class="stats">
+        <h2>Statystyki XMR - Tempo dostarczania (agregacja tygodniowa)</h2>
+        <div class="stat-item">
+            <span class="stat-label">Liczba tygodni:</span>
+            <span class="stat-value" id="count">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Mediana tempa dostarczania:</span>
+            <span class="stat-value" id="median" style="color: #4BC0C0;">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">UNPL (Upper Natural Process Limit):</span>
+            <span class="stat-value" id="unpl" style="color: #FF6384;">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">LNPL (Lower Natural Process Limit):</span>
+            <span class="stat-value" id="lnpl" style="color: #36A2EB;">-</span>
+        </div>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #054C8E;">
+            <h3 style="margin-top: 0; color: #054C8E;">Moving Range Statistics</h3>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Mediana Moving Range:</span>
+            <span class="stat-value" id="medianMR">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Upper Moving Range Limit (UMRL):</span>
+            <span class="stat-value" id="umrl" style="color: #FF6384;">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Lower Moving Range Limit (LMRL):</span>
+            <span class="stat-value" id="lmrl" style="color: #36A2EB;">-</span>
+        </div>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
+            <p style="font-size: 12px; color: #666; margin: 5px 0;"><strong>Legenda sygnałów:</strong></p>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: red;"></span>
+                <span>Punkt poza UNPL/LNPL</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: orange;"></span>
+                <span>2 z 3 poza 2/3 korytarza</span>
+            </div>
+            <div class="legend-item">
+                <span style="font-size: 20px; color: blue; margin-right: 5px;">😈</span>
+                <span>3 z 5 poza 2/3 limitu (niebieski diabeł)</span>
+            </div>
+            <div class="legend-item">
+                <span style="display: inline-block; width: 30px; height: 4px; background-color: #FF00FF; margin-right: 5px; vertical-align: middle;"></span>
+                <span>Trend wzrostowy (8 pkt powyżej mediany)</span>
+            </div>
+            <div class="legend-item">
+                <span style="display: inline-block; width: 30px; height: 4px; background-color: #000080; margin-right: 5px; vertical-align: middle;"></span>
+                <span>Trend spadkowy (8 pkt poniżej mediany)</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CSV data from "4. Tempo dostarczania dzienne.csv"
+        const csvData = `Data (DD/MM/YYYY);Przepustowość
+07.01.2025;0
+08.01.2025;2
+09.01.2025;10
+10.01.2025;3
+11.01.2025;0
+12.01.2025;0
+13.01.2025;2
+14.01.2025;3
+15.01.2025;7
+16.01.2025;0
+17.01.2025;0
+18.01.2025;0
+19.01.2025;0
+20.01.2025;5
+21.01.2025;2
+22.01.2025;0
+23.01.2025;0
+24.01.2025;0
+25.01.2025;0
+26.01.2025;0
+27.01.2025;1
+28.01.2025;1
+29.01.2025;0
+30.01.2025;5
+31.01.2025;4
+01.02.2025;0
+02.02.2025;0
+03.02.2025;7
+04.02.2025;0
+05.02.2025;2
+06.02.2025;2
+07.02.2025;12
+08.02.2025;0
+09.02.2025;0
+10.02.2025;1
+11.02.2025;0
+12.02.2025;0
+13.02.2025;2
+14.02.2025;12
+15.02.2025;0
+16.02.2025;0
+17.02.2025;1
+18.02.2025;0
+19.02.2025;0
+20.02.2025;3
+21.02.2025;11
+22.02.2025;0
+23.02.2025;0
+24.02.2025;6
+25.02.2025;0
+26.02.2025;0
+27.02.2025;6
+28.02.2025;7
+01.03.2025;0
+02.03.2025;0
+03.03.2025;2
+04.03.2025;0
+05.03.2025;0
+06.03.2025;3
+07.03.2025;5
+08.03.2025;0
+09.03.2025;0
+10.03.2025;1
+11.03.2025;0
+12.03.2025;0
+13.03.2025;9
+14.03.2025;7
+15.03.2025;0
+16.03.2025;0
+17.03.2025;3
+18.03.2025;0
+19.03.2025;0
+20.03.2025;4
+21.03.2025;10
+22.03.2025;0
+23.03.2025;0
+24.03.2025;1
+25.03.2025;0
+26.03.2025;0
+27.03.2025;5
+28.03.2025;1
+29.03.2025;0
+30.03.2025;0
+31.03.2025;2
+01.04.2025;0
+02.04.2025;0
+03.04.2025;2
+04.04.2025;11
+05.04.2025;0
+06.04.2025;0
+07.04.2025;1
+08.04.2025;0
+09.04.2025;0
+10.04.2025;5
+11.04.2025;2
+12.04.2025;0
+13.04.2025;0
+14.04.2025;1
+15.04.2025;0
+16.04.2025;0
+17.04.2025;4
+18.04.2025;7`;
+
+        let weeklyData = [];
+        let chart = null;
+        let mrChart = null;
+
+        // Parse CSV data
+        function parseCSV(csv) {
+            const lines = csv.trim().split('\n');
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].split(';');
+                if (parts.length >= 2) {
+                    const dateParts = parts[0].split('.');
+                    const day = parseInt(dateParts[0]);
+                    const month = parseInt(dateParts[1]) - 1;
+                    const year = parseInt(dateParts[2]);
+                    const date = new Date(year, month, day);
+                    
+                    data.push({
+                        date: date,
+                        dateString: parts[0],
+                        throughput: parseInt(parts[1])
+                    });
+                }
+            }
+            
+            return data;
+        }
+
+        // Get week number and year
+        function getWeek(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return { year: d.getUTCFullYear(), week: weekNo };
+        }
+
+        // Aggregate data weekly based on median
+        function aggregateWeekly(data) {
+            const weeklyMap = new Map();
+            
+            data.forEach(item => {
+                const { year, week } = getWeek(item.date);
+                const key = `${year}-W${week}`;
+                
+                if (!weeklyMap.has(key)) {
+                    weeklyMap.set(key, {
+                        key: key,
+                        year: year,
+                        week: week,
+                        values: []
+                    });
+                }
+                
+                weeklyMap.get(key).values.push(item.throughput);
+            });
+            
+            // Calculate median for each week
+            const weeklyAggregated = [];
+            weeklyMap.forEach((weekData, key) => {
+                const sorted = [...weekData.values].sort((a, b) => a - b);
+                const median = sorted.length % 2 === 0
+                    ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+                    : sorted[Math.floor(sorted.length / 2)];
+                
+                weeklyAggregated.push({
+                    key: key,
+                    year: weekData.year,
+                    week: weekData.week,
+                    median: median,
+                    count: weekData.values.length
+                });
+            });
+            
+            // Sort by year and week
+            weeklyAggregated.sort((a, b) => {
+                if (a.year !== b.year) return a.year - b.year;
+                return a.week - b.week;
+            });
+            
+            return weeklyAggregated;
+        }
+
+        // Calculate median
+        function calculateMedian(values) {
+            if (values.length === 0) return 0;
+            const sorted = [...values].sort((a, b) => a - b);
+            return sorted.length % 2 === 0
+                ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+                : sorted[Math.floor(sorted.length / 2)];
+        }
+
+        // Calculate statistics
+        function calculateStats(data) {
+            if (data.length === 0) return null;
+            
+            const values = data.map(d => d.median);
+            const median = calculateMedian(values);
+            
+            // Calculate moving ranges between consecutive values
+            const movingRanges = [];
+            for (let i = 1; i < values.length; i++) {
+                movingRanges.push(Math.abs(values[i] - values[i - 1]));
+            }
+            
+            // Calculate median moving range
+            const medianMovingRange = calculateMedian(movingRanges);
+            
+            // Calculate process sigma using moving range method
+            // d2 constant for subgroup size n=2 is approximately 1.128
+            const d2 = 1.128;
+            const sigmaMovingRange = medianMovingRange / d2;
+            
+            // Calculate UNPL and LNPL using moving range method (Median ± 3σ)
+            const unpl = median + (3 * sigmaMovingRange);
+            const lnpl = Math.max(0, median - (3 * sigmaMovingRange));
+            
+            // Calculate Moving Range control limits
+            // UMRL = medianMR × 3.27 (Upper Moving Range Limit)
+            // LMRL = medianMR ÷ 3.27 (Lower Moving Range Limit)
+            const umrl = medianMovingRange * 3.27;
+            const lmrl = Math.max(0, medianMovingRange / 3.27);
+            
+            return {
+                count: values.length,
+                median: median,
+                unpl: unpl,
+                lnpl: lnpl,
+                movingRanges: movingRanges,
+                medianMovingRange: medianMovingRange,
+                umrl: umrl,
+                lmrl: lmrl
+            };
+        }
+
+        // Detect signals for X chart
+        function detectSignals(data, stats) {
+            const values = data.map(d => d.median);
+            const signals = [];
+            
+            const twoThirdsUpper = stats.median + (2/3) * (stats.unpl - stats.median);
+            const oneThirdLower = stats.median - (2/3) * (stats.median - stats.lnpl);
+            
+            for (let i = 0; i < values.length; i++) {
+                const signal = {
+                    index: i,
+                    outsideLimits: false,
+                    twoOfThree: false,
+                    threeOfFive: false,
+                    trend: null
+                };
+                
+                // Rule 1: Single point outside UNPL or LNPL
+                if (values[i] > stats.unpl || values[i] < stats.lnpl) {
+                    signal.outsideLimits = true;
+                }
+                
+                // Rule 2: 2 of 3 consecutive points outside 2/3 corridor
+                if (i >= 2) {
+                    let countOutside = 0;
+                    for (let j = i - 2; j <= i; j++) {
+                        if (values[j] > twoThirdsUpper || values[j] < oneThirdLower) {
+                            countOutside++;
+                        }
+                    }
+                    if (countOutside >= 2) {
+                        signal.twoOfThree = true;
+                    }
+                }
+                
+                // Rule 3: 3 of 5 consecutive elements above 2/3 UMPL or below 1/3 LMPL
+                if (i >= 4) {
+                    let countAbove = 0;
+                    let countBelow = 0;
+                    for (let j = i - 4; j <= i; j++) {
+                        if (values[j] > twoThirdsUpper) countAbove++;
+                        if (values[j] < oneThirdLower) countBelow++;
+                    }
+                    if (countAbove >= 3 || countBelow >= 3) {
+                        signal.threeOfFive = true;
+                    }
+                }
+                
+                // Rule 4: 8 consecutive elements above or below median
+                if (i >= 7) {
+                    let allAbove = true;
+                    let allBelow = true;
+                    for (let j = i - 7; j <= i; j++) {
+                        if (values[j] <= stats.median) allAbove = false;
+                        if (values[j] >= stats.median) allBelow = false;
+                    }
+                    if (allAbove) signal.trend = 'up';
+                    if (allBelow) signal.trend = 'down';
+                }
+                
+                signals.push(signal);
+            }
+            
+            return signals;
+        }
+
+        // Update statistics display
+        function updateStats(data) {
+            const stats = calculateStats(data);
+            
+            if (stats) {
+                document.getElementById('count').textContent = stats.count;
+                document.getElementById('median').textContent = stats.median.toFixed(2);
+                document.getElementById('unpl').textContent = stats.unpl.toFixed(2);
+                document.getElementById('lnpl').textContent = stats.lnpl.toFixed(2);
+                document.getElementById('medianMR').textContent = stats.medianMovingRange.toFixed(2);
+                document.getElementById('umrl').textContent = stats.umrl.toFixed(2);
+                document.getElementById('lmrl').textContent = stats.lmrl.toFixed(2);
+            }
+            
+            return stats;
+        }
+
+        // Create X chart with signal detection
+        function createChart(data) {
+            const ctx = document.getElementById('xChart').getContext('2d');
+            const stats = calculateStats(data);
+            const signals = detectSignals(data, stats);
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            const labels = data.map(d => d.key);
+            const values = data.map(d => d.median);
+            
+            // Color points based on signals
+            const pointColors = values.map((v, i) => {
+                if (signals[i].outsideLimits) return 'red';
+                if (signals[i].twoOfThree) return 'orange';
+                return '#054C8E';
+            });
+            
+            const pointRadii = values.map((v, i) => {
+                if (signals[i].threeOfFive) return 8;
+                return 5;
+            });
+            
+            // Create annotations for control limits and trends
+            const annotations = {
+                median: {
+                    type: 'line',
+                    yMin: stats.median,
+                    yMax: stats.median,
+                    borderColor: '#4BC0C0',
+                    borderWidth: 3,
+                    label: {
+                        content: `Mediana: ${stats.median.toFixed(2)}`,
+                        enabled: true,
+                        position: 'start',
+                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                        color: 'white',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                },
+                unpl: {
+                    type: 'line',
+                    yMin: stats.unpl,
+                    yMax: stats.unpl,
+                    borderColor: '#FF6384',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    label: {
+                        content: `UNPL: ${stats.unpl.toFixed(2)}`,
+                        enabled: true,
+                        position: 'end',
+                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                        color: 'white',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                },
+                lnpl: {
+                    type: 'line',
+                    yMin: stats.lnpl,
+                    yMax: stats.lnpl,
+                    borderColor: '#36A2EB',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    label: {
+                        content: `LNPL: ${stats.lnpl.toFixed(2)}`,
+                        enabled: true,
+                        position: 'start',
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        color: 'white',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                },
+                twoThirdsUpper: {
+                    type: 'line',
+                    yMin: stats.median + (2/3) * (stats.unpl - stats.median),
+                    yMax: stats.median + (2/3) * (stats.unpl - stats.median),
+                    borderColor: '#FFA500',
+                    borderWidth: 1,
+                    borderDash: [3, 3],
+                    label: {
+                        content: `2/3 UMPL`,
+                        enabled: true,
+                        position: 'end',
+                        backgroundColor: 'rgba(255, 165, 0, 0.6)',
+                        color: 'white',
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
+                oneThirdLower: {
+                    type: 'line',
+                    yMin: stats.median - (2/3) * (stats.median - stats.lnpl),
+                    yMax: stats.median - (2/3) * (stats.median - stats.lnpl),
+                    borderColor: '#FFA500',
+                    borderWidth: 1,
+                    borderDash: [3, 3],
+                    label: {
+                        content: `1/3 LNPL`,
+                        enabled: true,
+                        position: 'start',
+                        backgroundColor: 'rgba(255, 165, 0, 0.6)',
+                        color: 'white',
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            };
+            
+            // Add trend line annotations
+            let trendSegments = [];
+            let currentTrend = null;
+            let segmentStart = null;
+            
+            for (let i = 0; i < signals.length; i++) {
+                if (signals[i].trend) {
+                    if (signals[i].trend !== currentTrend) {
+                        if (currentTrend !== null && segmentStart !== null) {
+                            trendSegments.push({
+                                start: segmentStart,
+                                end: i - 1,
+                                trend: currentTrend
+                            });
+                        }
+                        currentTrend = signals[i].trend;
+                        segmentStart = i;
+                    }
+                } else {
+                    if (currentTrend !== null && segmentStart !== null) {
+                        trendSegments.push({
+                            start: segmentStart,
+                            end: i - 1,
+                            trend: currentTrend
+                        });
+                    }
+                    currentTrend = null;
+                    segmentStart = null;
+                }
+            }
+            
+            // Add last segment if it exists
+            if (currentTrend !== null && segmentStart !== null) {
+                trendSegments.push({
+                    start: segmentStart,
+                    end: signals.length - 1,
+                    trend: currentTrend
+                });
+            }
+            
+            // Add trend line annotations
+            trendSegments.forEach((segment, idx) => {
+                annotations[`trend_${idx}`] = {
+                    type: 'line',
+                    xMin: segment.start,
+                    xMax: segment.end,
+                    yMin: values[segment.start],
+                    yMax: values[segment.end],
+                    borderColor: segment.trend === 'up' ? '#FF00FF' : '#000080',
+                    borderWidth: 4
+                };
+            });
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Mediana tempa dostarczania (tygodniowo)',
+                        data: values,
+                        borderColor: '#054C8E',
+                        backgroundColor: 'rgba(5, 76, 142, 0.1)',
+                        pointBackgroundColor: pointColors,
+                        pointBorderColor: pointColors,
+                        pointRadius: pointRadii,
+                        pointHoverRadius: pointRadii.map(r => r + 2),
+                        pointStyle: values.map((v, i) => {
+                            if (signals[i].threeOfFive) return 'star';
+                            return 'circle';
+                        }),
+                        tension: 0,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 2,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Wykres X - Tempo dostarczania (agregacja tygodniowa)',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            color: '#1D1D1B'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        annotation: {
+                            annotations: annotations
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const dataPoint = data[context.dataIndex];
+                                    const signal = signals[context.dataIndex];
+                                    const labels = [`Mediana: ${context.parsed.y.toFixed(2)}`];
+                                    
+                                    if (signal.outsideLimits) labels.push('⚠️ Punkt poza limitami kontrolnymi');
+                                    if (signal.twoOfThree) labels.push('⚠️ 2 z 3 poza 2/3 korytarza');
+                                    if (signal.threeOfFive) labels.push('😈 3 z 5 poza 2/3 limitu');
+                                    if (signal.trend === 'up') labels.push('📈 Trend wzrostowy (8 pkt)');
+                                    if (signal.trend === 'down') labels.push('📉 Trend spadkowy (8 pkt)');
+                                    
+                                    return labels;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Mediana przepustowości',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tydzień',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create Moving Range chart
+        function createMRChart(data) {
+            const ctx = document.getElementById('mrChart').getContext('2d');
+            const stats = calculateStats(data);
+            
+            if (mrChart) {
+                mrChart.destroy();
+            }
+            
+            // Labels start from #2 since moving range starts from second data point
+            const labels = [];
+            for (let i = 1; i < data.length; i++) {
+                labels.push(`${data[i-1].key}-${data[i].key}`);
+            }
+            
+            mrChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Moving Range',
+                        data: stats.movingRanges,
+                        borderColor: '#FF9F40',
+                        backgroundColor: 'rgba(255, 159, 64, 0.1)',
+                        pointBackgroundColor: '#FF9F40',
+                        pointBorderColor: '#FF9F40',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        tension: 0,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 2,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Wykres Moving Range - Zmienność między kolejnymi tygodniami',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            color: '#1D1D1B'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        annotation: {
+                            annotations: {
+                                medianMR: {
+                                    type: 'line',
+                                    yMin: stats.medianMovingRange,
+                                    yMax: stats.medianMovingRange,
+                                    borderColor: '#4BC0C0',
+                                    borderWidth: 3,
+                                    label: {
+                                        content: `Mediana mR: ${stats.medianMovingRange.toFixed(2)}`,
+                                        enabled: true,
+                                        position: 'start',
+                                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                                        color: 'white',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                umrl: {
+                                    type: 'line',
+                                    yMin: stats.umrl,
+                                    yMax: stats.umrl,
+                                    borderColor: '#FF6384',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: `UMRL: ${stats.umrl.toFixed(2)} (mR × 3.27)`,
+                                        enabled: true,
+                                        position: 'end',
+                                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                                        color: 'white',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                lmrl: {
+                                    type: 'line',
+                                    yMin: stats.lmrl,
+                                    yMax: stats.lmrl,
+                                    borderColor: '#36A2EB',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: `LMRL: ${stats.lmrl.toFixed(2)} (mR ÷ 3.27)`,
+                                        enabled: true,
+                                        position: 'start',
+                                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                                        color: 'white',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Moving Range: ${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Moving Range',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Kolejne pary tygodni',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            const dailyData = parseCSV(csvData);
+            weeklyData = aggregateWeekly(dailyData);
+            updateStats(weeklyData);
+            createChart(weeklyData);
+            createMRChart(weeklyData);
+        });
+    </script>
+</body>
+</html>
