@@ -382,7 +382,8 @@
             const weekCounts = {};
             dates.forEach(date => {
                 const weekStart = new Date(date);
-                weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1); // Poniedziałek
+                const dayOfWeek = weekStart.getDay() || 7; // Treat Sunday (0) as 7
+                weekStart.setDate(weekStart.getDate() - dayOfWeek + 1); // Poniedziałek
                 const key = formatDate(weekStart);
                 weekCounts[key] = (weekCounts[key] || 0) + 1;
             });
