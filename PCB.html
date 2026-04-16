@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wykres X - Process Control Behavior</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #1D1D1B;
+        }
+        
+        .header {
+            background-color: #054C8E;
+            color: white;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(5, 76, 142, 0.2);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            max-height: 80px;
+            width: auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+        }
+        
+        .nav {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+        
+        .nav a {
+            color: #ffffff;
+            background-color: #054C8E;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            display: inline-block;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        
+        .nav a:hover {
+            background-color: #003E83;
+            box-shadow: 0 2px 8px rgba(5, 76, 142, 0.3);
+        }
+        
+        .chart-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 20px 30px 20px;
+        }
+        
+        .filters {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 20px 30px 20px;
+        }
+        
+        .filters h2 {
+            margin-top: 0;
+            color: #054C8E;
+            border-bottom: 3px solid #054C8E;
+            padding-bottom: 10px;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-item label {
+            font-weight: bold;
+            color: #1D1D1B;
+            font-size: 14px;
+        }
+        
+        .filter-item input {
+            padding: 8px 12px;
+            border: 2px solid #054C8E;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #054C8E;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #003E83;
+            box-shadow: 0 2px 8px rgba(5, 76, 142, 0.3);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .stats {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 20px 30px 20px;
+        }
+        
+        .stats h2 {
+            margin-top: 0;
+            color: #054C8E;
+            border-bottom: 3px solid #054C8E;
+            padding-bottom: 10px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            font-weight: bold;
+            color: #1D1D1B;
+        }
+        
+        .stat-value {
+            color: #054C8E;
+            font-weight: bold;
+        }
+        
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+            border-radius: 3px;
+        }
+        
+        .greeting {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            margin: 0 20px 30px 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <img src="2.jpg.png" alt="Logo" class="logo">
+            <h1>Wykres X - Process Control Behavior</h1>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <a href="index.html">← Histogram</a>
+        <a href="scatter.html">Scatterplot</a>
+    </div>
+    
+    <div class="greeting">
+        🌟 Pozdrowienia dla pięknych i bogatych! 🌟
+    </div>
+    
+    <div class="filters">
+        <h2>Filtrowanie danych</h2>
+        <div class="filter-group">
+            <div class="filter-item">
+                <label for="filterStart">ID początkowy:</label>
+                <input type="number" id="filterStart" min="1" placeholder="Od...">
+            </div>
+            <div class="filter-item">
+                <label for="filterEnd">ID końcowy:</label>
+                <input type="number" id="filterEnd" min="1" placeholder="Do...">
+            </div>
+            <div class="filter-item">
+                <label for="filterMinCycle">Min. Cycle Time:</label>
+                <input type="number" id="filterMinCycle" min="0" placeholder="Min...">
+            </div>
+            <div class="filter-item">
+                <label for="filterMaxCycle">Max. Cycle Time:</label>
+                <input type="number" id="filterMaxCycle" min="0" placeholder="Max...">
+            </div>
+        </div>
+        <div style="margin-top: 15px;">
+            <button class="btn btn-primary" onclick="applyFilters()">Zastosuj filtry</button>
+            <button class="btn btn-secondary" onclick="resetFilters()">Resetuj filtry</button>
+        </div>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="xChart"></canvas>
+    </div>
+    
+    <div class="stats">
+        <h2>Statystyki kontroli procesu</h2>
+        <div class="stat-item">
+            <span class="stat-label">Liczba pomiarów:</span>
+            <span class="stat-value" id="count">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Średnia (Mean / X̄):</span>
+            <span class="stat-value" id="mean">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Mediana:</span>
+            <span class="stat-value" id="median" style="color: #4BC0C0;">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Odchylenie standardowe (σ):</span>
+            <span class="stat-value" id="stdDev">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">UNPL (Upper Natural Process Limit):</span>
+            <span class="stat-value" id="unpl" style="color: #FF6384;">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">LNPL (Lower Natural Process Limit):</span>
+            <span class="stat-value" id="lnpl" style="color: #36A2EB;">-</span>
+        </div>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
+            <p style="font-size: 12px; color: #666; margin: 5px 0;"><strong>Legenda:</strong></p>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #054C8E;"></span>
+                <span>Pomiary (Cycle Time)</span>
+            </div>
+            <div class="legend-item">
+                <span style="display: inline-block; width: 30px; height: 3px; background-color: #4BC0C0; margin-right: 5px; vertical-align: middle;"></span>
+                <span>Mediana (zielony)</span>
+            </div>
+            <div class="legend-item">
+                <span style="display: inline-block; width: 30px; height: 3px; background-color: #9966FF; margin-right: 5px; vertical-align: middle; border: 2px dashed #9966FF;"></span>
+                <span>Średnia X̄ (fioletowy)</span>
+            </div>
+            <div class="legend-item">
+                <span style="display: inline-block; width: 30px; height: 3px; background-color: #FF6384; margin-right: 5px; vertical-align: middle; border: 2px dashed #FF6384;"></span>
+                <span>UNPL (czerwony)</span>
+            </div>
+            <div class="legend-item">
+                <span style="display: inline-block; width: 30px; height: 3px; background-color: #36A2EB; margin-right: 5px; vertical-align: middle; border: 2px dashed #36A2EB;"></span>
+                <span>LNPL (niebieski)</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CSV data from "3. PCB Czas realizacji.csv"
+        const csvData = `ID;Started;Closed;Cycle Time
+1;11.28.2023;1.5.2024;38
+2;12.20.2023;1.11.2024;24
+3;1.2.2024;1.16.2024;14
+4;1.10.2024;1.17.2024;9
+5;1.18.2024;1.22.2024;4
+6;1.3.2024;1.26.2024;25
+7;1.10.2024;1.29.2024;19
+8;12.19.2023;2.6.2024;51
+9;12.26.2023;2.12.2024;48
+10;2.2.2024;2.15.2024;15
+11;1.26.2024;2.17.2024;22
+12;1.9.2024;2.18.2024;42
+13;2.2.2024;2.19.2024;17
+14;2.16.2024;2.21.2024;7
+15;2.23.2024;2.28.2024;5
+16;2.20.2024;3.12.2024;20
+17;1.12.2024;3.14.2024;63
+18;3.13.2024;3.19.2024;6
+19;1.25.2024;3.20.2024;56
+20;2.28.2024;3.22.2024;24
+21;2.28.2024;3.22.2024;22
+22;2.6.2024;3.26.2024;50
+23;3.21.2024;3.27.2024;8
+24;3.26.2024;3.28.2024;2
+25;3.28.2024;3.29.2024;3
+26;3.22.2024;3.30.2024;8
+27;2.26.2024;4.1.2024;36
+28;3.6.2024;4.2.2024;27
+29;3.13.2024;4.9.2024;29
+30;3.20.2024;4.9.2024;20`;
+
+        let allData = [];
+        let filteredData = [];
+        let chart = null;
+
+        // Parse CSV data
+        function parseCSV(csv) {
+            const lines = csv.trim().split('\n');
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].split(';');
+                if (parts.length >= 4) {
+                    data.push({
+                        id: parseInt(parts[0]),
+                        started: parts[1],
+                        closed: parts[2],
+                        cycleTime: parseInt(parts[3])
+                    });
+                }
+            }
+            
+            return data;
+        }
+
+        // Calculate statistics
+        function calculateStats(data) {
+            if (data.length === 0) return null;
+            
+            const values = data.map(d => d.cycleTime);
+            const sum = values.reduce((a, b) => a + b, 0);
+            const mean = sum / values.length;
+            
+            // Calculate median
+            const sorted = [...values].sort((a, b) => a - b);
+            const median = sorted.length % 2 === 0
+                ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+                : sorted[Math.floor(sorted.length / 2)];
+            
+            // Calculate standard deviation
+            const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+            const stdDev = Math.sqrt(variance);
+            
+            // Calculate UNPL and LNPL (Mean ± 3σ for natural process limits)
+            const unpl = mean + (3 * stdDev);
+            const lnpl = Math.max(0, mean - (3 * stdDev)); // Cannot be negative
+            
+            return {
+                count: values.length,
+                mean: mean,
+                median: median,
+                stdDev: stdDev,
+                unpl: unpl,
+                lnpl: lnpl
+            };
+        }
+
+        // Update statistics display
+        function updateStats(data) {
+            const stats = calculateStats(data);
+            
+            if (stats) {
+                document.getElementById('count').textContent = stats.count;
+                document.getElementById('mean').textContent = stats.mean.toFixed(2) + ' dni';
+                document.getElementById('median').textContent = stats.median.toFixed(2) + ' dni';
+                document.getElementById('stdDev').textContent = stats.stdDev.toFixed(2) + ' dni';
+                document.getElementById('unpl').textContent = stats.unpl.toFixed(2) + ' dni';
+                document.getElementById('lnpl').textContent = stats.lnpl.toFixed(2) + ' dni';
+            }
+            
+            return stats;
+        }
+
+        // Create X chart
+        function createChart(data) {
+            const ctx = document.getElementById('xChart').getContext('2d');
+            const stats = calculateStats(data);
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            const labels = data.map(d => `#${d.id}`);
+            const values = data.map(d => d.cycleTime);
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cycle Time (dni)',
+                        data: values,
+                        borderColor: '#054C8E',
+                        backgroundColor: 'rgba(5, 76, 142, 0.1)',
+                        pointBackgroundColor: '#054C8E',
+                        pointBorderColor: '#054C8E',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        tension: 0,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 2,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Wykres X - Kontrola procesu (Process Control Behavior)',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            color: '#1D1D1B'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        annotation: {
+                            annotations: {
+                                mean: {
+                                    type: 'line',
+                                    yMin: stats.mean,
+                                    yMax: stats.mean,
+                                    borderColor: '#9966FF',
+                                    borderWidth: 2,
+                                    borderDash: [10, 5],
+                                    label: {
+                                        content: `Średnia: ${stats.mean.toFixed(2)}`,
+                                        enabled: true,
+                                        position: 'end',
+                                        backgroundColor: 'rgba(153, 102, 255, 0.8)',
+                                        color: 'white',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                median: {
+                                    type: 'line',
+                                    yMin: stats.median,
+                                    yMax: stats.median,
+                                    borderColor: '#4BC0C0',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Mediana: ${stats.median.toFixed(2)}`,
+                                        enabled: true,
+                                        position: 'start',
+                                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                                        color: 'white',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                unpl: {
+                                    type: 'line',
+                                    yMin: stats.unpl,
+                                    yMax: stats.unpl,
+                                    borderColor: '#FF6384',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: `UNPL: ${stats.unpl.toFixed(2)}`,
+                                        enabled: true,
+                                        position: 'end',
+                                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                                        color: 'white',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                lnpl: {
+                                    type: 'line',
+                                    yMin: stats.lnpl,
+                                    yMax: stats.lnpl,
+                                    borderColor: '#36A2EB',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: `LNPL: ${stats.lnpl.toFixed(2)}`,
+                                        enabled: true,
+                                        position: 'start',
+                                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                                        color: 'white',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const dataPoint = data[context.dataIndex];
+                                    return [
+                                        `Cycle Time: ${context.parsed.y} dni`,
+                                        `Started: ${dataPoint.started}`,
+                                        `Closed: ${dataPoint.closed}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Cycle Time (dni)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' dni';
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Numer zadania',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const startId = parseInt(document.getElementById('filterStart').value) || 1;
+            const endId = parseInt(document.getElementById('filterEnd').value) || Infinity;
+            const minCycle = parseInt(document.getElementById('filterMinCycle').value) || 0;
+            const maxCycle = parseInt(document.getElementById('filterMaxCycle').value) || Infinity;
+            
+            filteredData = allData.filter(d => 
+                d.id >= startId && 
+                d.id <= endId && 
+                d.cycleTime >= minCycle && 
+                d.cycleTime <= maxCycle
+            );
+            
+            updateStats(filteredData);
+            createChart(filteredData);
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('filterStart').value = '';
+            document.getElementById('filterEnd').value = '';
+            document.getElementById('filterMinCycle').value = '';
+            document.getElementById('filterMaxCycle').value = '';
+            
+            filteredData = [...allData];
+            updateStats(filteredData);
+            createChart(filteredData);
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            allData = parseCSV(csvData);
+            filteredData = [...allData];
+            updateStats(filteredData);
+            createChart(filteredData);
+        });
+    </script>
+</body>
+</html>
