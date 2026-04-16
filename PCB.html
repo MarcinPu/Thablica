@@ -259,6 +259,10 @@
         <canvas id="xChart"></canvas>
     </div>
     
+    <div class="chart-container">
+        <canvas id="mrChart"></canvas>
+    </div>
+    
     <div class="stats">
         <h2>Statystyki kontroli procesu</h2>
         <div class="stat-item">
@@ -284,6 +288,21 @@
         <div class="stat-item">
             <span class="stat-label">LNPL (Lower Natural Process Limit):</span>
             <span class="stat-value" id="lnpl" style="color: #36A2EB;">-</span>
+        </div>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #054C8E;">
+            <h3 style="margin-top: 0; color: #054C8E;">Moving Range Statistics</h3>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Średnia Moving Range (mR̄):</span>
+            <span class="stat-value" id="avgMR">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Upper Moving Range Limit (UMRL):</span>
+            <span class="stat-value" id="umrl" style="color: #FF6384;">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Lower Moving Range Limit (LMRL):</span>
+            <span class="stat-value" id="lmrl" style="color: #36A2EB;">-</span>
         </div>
         <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
             <p style="font-size: 12px; color: #666; margin: 5px 0;"><strong>Legenda:</strong></p>
@@ -347,6 +366,7 @@
         let allData = [];
         let filteredData = [];
         let chart = null;
+        let mrChart = null;
 
         // Parse CSV data
         function parseCSV(csv) {
@@ -406,13 +426,23 @@
             const unpl = mean + (3 * sigmaMovingRange);
             const lnpl = Math.max(0, mean - (3 * sigmaMovingRange)); // Cannot be negative
             
+            // Calculate Moving Range control limits
+            // UMRL = mR̄ + 3.27 (Upper Moving Range Limit)
+            // LMRL = mR̄ - 3.27 (Lower Moving Range Limit)
+            const umrl = avgMovingRange + 3.27;
+            const lmrl = Math.max(0, avgMovingRange - 3.27); // Cannot be negative
+            
             return {
                 count: values.length,
                 mean: mean,
                 median: median,
                 stdDev: stdDev,
                 unpl: unpl,
-                lnpl: lnpl
+                lnpl: lnpl,
+                movingRanges: movingRanges,
+                avgMovingRange: avgMovingRange,
+                umrl: umrl,
+                lmrl: lmrl
             };
         }
 
@@ -427,6 +457,9 @@
                 document.getElementById('stdDev').textContent = stats.stdDev.toFixed(2) + ' dni';
                 document.getElementById('unpl').textContent = stats.unpl.toFixed(2) + ' dni';
                 document.getElementById('lnpl').textContent = stats.lnpl.toFixed(2) + ' dni';
+                document.getElementById('avgMR').textContent = stats.avgMovingRange.toFixed(2);
+                document.getElementById('umrl').textContent = stats.umrl.toFixed(2);
+                document.getElementById('lmrl').textContent = stats.lmrl.toFixed(2);
             }
             
             return stats;
@@ -599,6 +632,149 @@
             });
         }
 
+        // Create Moving Range chart
+        function createMRChart(data) {
+            const ctx = document.getElementById('mrChart').getContext('2d');
+            const stats = calculateStats(data);
+            
+            if (mrChart) {
+                mrChart.destroy();
+            }
+            
+            // Labels start from #2 since moving range starts from second data point
+            const labels = [];
+            for (let i = 1; i < data.length; i++) {
+                labels.push(`#${data[i-1].id}-#${data[i].id}`);
+            }
+            
+            mrChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Moving Range',
+                        data: stats.movingRanges,
+                        borderColor: '#FF9F40',
+                        backgroundColor: 'rgba(255, 159, 64, 0.1)',
+                        pointBackgroundColor: '#FF9F40',
+                        pointBorderColor: '#FF9F40',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        tension: 0,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 2,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Wykres Moving Range - Zmienność między kolejnymi pomiarami',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            color: '#1D1D1B'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        annotation: {
+                            annotations: {
+                                avgMR: {
+                                    type: 'line',
+                                    yMin: stats.avgMovingRange,
+                                    yMax: stats.avgMovingRange,
+                                    borderColor: '#9966FF',
+                                    borderWidth: 2,
+                                    borderDash: [10, 5],
+                                    label: {
+                                        content: `Średnia mR̄: ${stats.avgMovingRange.toFixed(2)}`,
+                                        enabled: true,
+                                        position: 'end',
+                                        backgroundColor: 'rgba(153, 102, 255, 0.8)',
+                                        color: 'white',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                umrl: {
+                                    type: 'line',
+                                    yMin: stats.umrl,
+                                    yMax: stats.umrl,
+                                    borderColor: '#FF6384',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: `UMRL: ${stats.umrl.toFixed(2)} (mR̄ + 3.27)`,
+                                        enabled: true,
+                                        position: 'end',
+                                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                                        color: 'white',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                lmrl: {
+                                    type: 'line',
+                                    yMin: stats.lmrl,
+                                    yMax: stats.lmrl,
+                                    borderColor: '#36A2EB',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: `LMRL: ${stats.lmrl.toFixed(2)} (mR̄ - 3.27)`,
+                                        enabled: true,
+                                        position: 'start',
+                                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                                        color: 'white',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Moving Range: ${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Moving Range',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Kolejne pary pomiarów',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         // Apply filters
         function applyFilters() {
             const startId = parseInt(document.getElementById('filterStart').value) || 1;
@@ -615,6 +791,7 @@
             
             updateStats(filteredData);
             createChart(filteredData);
+            createMRChart(filteredData);
         }
 
         // Reset filters
@@ -627,6 +804,7 @@
             filteredData = [...allData];
             updateStats(filteredData);
             createChart(filteredData);
+            createMRChart(filteredData);
         }
 
         // Initialize
@@ -635,6 +813,7 @@
             filteredData = [...allData];
             updateStats(filteredData);
             createChart(filteredData);
+            createMRChart(filteredData);
         });
     </script>
 </body>
