@@ -304,8 +304,15 @@
             
             while (currentDate <= endDate) {
                 let velocity = generateVelocity();
-                itemsCompleted += velocity;
-                currentDate = new Date(currentDate.getTime() + sprintLengthDays * 24 * 60 * 60 * 1000);
+                // Move to the next sprint end date
+                let nextSprintEnd = new Date(currentDate.getTime() + sprintLengthDays * 24 * 60 * 60 * 1000);
+                
+                // Only count items if the sprint completes before or on the end date
+                if (nextSprintEnd <= endDate) {
+                    itemsCompleted += velocity;
+                }
+                
+                currentDate = nextSprintEnd;
             }
             
             return itemsCompleted;
@@ -371,7 +378,7 @@
                 counts[key] = (counts[key] || 0) + 1;
             });
             
-            // Pogrupuj po tygodniach dla lepszej czytelności
+            // Grupuj po tygodniach (poniedziałek początek tygodnia) dla lepszej wizualizacji histogramu
             const weekCounts = {};
             dates.forEach(date => {
                 const weekStart = new Date(date);
