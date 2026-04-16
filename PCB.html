@@ -386,9 +386,25 @@
             const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
             const stdDev = Math.sqrt(variance);
             
-            // Calculate UNPL and LNPL (Mean ± 3σ for natural process limits)
-            const unpl = mean + (3 * stdDev);
-            const lnpl = Math.max(0, mean - (3 * stdDev)); // Cannot be negative
+            // Calculate moving ranges between consecutive values
+            const movingRanges = [];
+            for (let i = 1; i < values.length; i++) {
+                movingRanges.push(Math.abs(values[i] - values[i - 1]));
+            }
+            
+            // Calculate average moving range (mR̄)
+            const avgMovingRange = movingRanges.length > 0 
+                ? movingRanges.reduce((sum, val) => sum + val, 0) / movingRanges.length 
+                : 0;
+            
+            // Calculate process sigma using moving range method
+            // d2 constant for subgroup size n=2 is approximately 1.128
+            const d2 = 1.128;
+            const sigmaMovingRange = avgMovingRange / d2;
+            
+            // Calculate UNPL and LNPL using moving range method (Mean ± 3σ)
+            const unpl = mean + (3 * sigmaMovingRange);
+            const lnpl = Math.max(0, mean - (3 * sigmaMovingRange)); // Cannot be negative
             
             return {
                 count: values.length,
