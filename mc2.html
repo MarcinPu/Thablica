@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monte Carlo - Prognoza Epików</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #1D1D1B;
+        }
+        
+        .header {
+            background-color: #054C8E;
+            color: white;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(5, 76, 142, 0.2);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            max-height: 80px;
+            width: auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+        }
+        
+        .nav {
+            background-color: #ffffff;
+            padding: 15px 20px;
+            margin: 0 20px 30px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .nav a {
+            text-decoration: none;
+            color: #054C8E;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav a:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 20px 30px 20px;
+        }
+        
+        .container h2 {
+            margin-top: 0;
+            color: #054C8E;
+            border-bottom: 3px solid #054C8E;
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #1D1D1B;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr 2fr;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        table th {
+            background-color: #054C8E;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        table td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        table input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .btn {
+            background-color: #054C8E;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #043a6b;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            margin-left: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .results {
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #054C8E;
+        }
+        
+        .results h3 {
+            margin-top: 0;
+            color: #054C8E;
+        }
+        
+        .result-item {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+        
+        .result-label {
+            font-weight: bold;
+            color: #1D1D1B;
+        }
+        
+        .result-value {
+            color: #054C8E;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .chart-container {
+            margin-top: 30px;
+        }
+        
+        .capacity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .capacity-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .capacity-item label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .capacity-item select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .info-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .info-box p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <img src="2.jpg.png" alt="Logo" class="logo">
+            <h1>Monte Carlo - Prognoza Dostarczania Epików</h1>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <a href="index.html">← Histogram</a>
+        <a href="scatter.html">Scatterplot</a>
+        <a href="PCB.html">Wykres X (PCB)</a>
+        <a href="XMR.html">Wykres XMR</a>
+        <a href="mc1.html">Monte Carlo 1</a>
+    </div>
+    
+    <div class="container">
+        <h2>Parametry Projekcji</h2>
+        
+        <div class="info-box">
+            <p><strong>Instrukcja:</strong> Wprowadź dane epików, parametry zespołu i historyczne tempo dostarczania. System użyje symulacji Monte Carlo do prognozowania dat ukończenia przy użyciu percentyli 85% i 95%.</p>
+        </div>
+        
+        <div class="input-group">
+            <label for="startDate">Data rozpoczęcia projekcji:</label>
+            <input type="date" id="startDate" value="2026-05-01">
+        </div>
+        
+        <div class="input-group">
+            <label for="endDate">Oczekiwana data końca (opcjonalnie):</label>
+            <input type="date" id="endDate">
+        </div>
+        
+        <div class="input-group">
+            <label for="sprintWeeks">Długość sprintu (tygodnie):</label>
+            <select id="sprintWeeks">
+                <option value="1">1 tydzień</option>
+                <option value="2" selected>2 tygodnie</option>
+                <option value="3">3 tygodnie</option>
+                <option value="4">4 tygodnie</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label for="teamFocus">Skala skupienia zespołu:</label>
+            <select id="teamFocus">
+                <option value="1.00" selected>100% - Pełne skupienie</option>
+                <option value="0.75">75% - Wysokie skupienie</option>
+                <option value="0.50">50% - Średnie skupienie</option>
+                <option value="0.25">25% - Niskie skupienie</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label for="historicalVelocity">Historyczne tempo dostarczania (liczba historyjek/sprint, oddzielone przecinkami):</label>
+            <input type="text" id="historicalVelocity" placeholder="np. 5,4,4,5,6,4,2,3,2,5,6" value="5,4,4,5,6,4,2,3,2,5,6">
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>Epiki do Dostarczenia</h2>
+        
+        <table id="epicsTable">
+            <thead>
+                <tr>
+                    <th>Epik</th>
+                    <th>Estymacja Min (liczba historyjek)</th>
+                    <th>Estymacja Max (liczba historyjek)</th>
+                </tr>
+            </thead>
+            <tbody id="epicsTableBody">
+                <tr>
+                    <td>Epik 1</td>
+                    <td><input type="number" class="epic-min" min="0" value="5"></td>
+                    <td><input type="number" class="epic-max" min="0" value="10"></td>
+                </tr>
+                <tr>
+                    <td>Epik 2</td>
+                    <td><input type="number" class="epic-min" min="0" value="3"></td>
+                    <td><input type="number" class="epic-max" min="0" value="8"></td>
+                </tr>
+                <tr>
+                    <td>Epik 3</td>
+                    <td><input type="number" class="epic-min" min="0" value="4"></td>
+                    <td><input type="number" class="epic-max" min="0" value="7"></td>
+                </tr>
+                <tr>
+                    <td>Epik 4</td>
+                    <td><input type="number" class="epic-min" min="0" value="6"></td>
+                    <td><input type="number" class="epic-max" min="0" value="12"></td>
+                </tr>
+                <tr>
+                    <td>Epik 5</td>
+                    <td><input type="number" class="epic-min" min="0" value="2"></td>
+                    <td><input type="number" class="epic-max" min="0" value="5"></td>
+                </tr>
+                <tr>
+                    <td>Epik 6</td>
+                    <td><input type="number" class="epic-min" min="0" value="0"></td>
+                    <td><input type="number" class="epic-max" min="0" value="0"></td>
+                </tr>
+                <tr>
+                    <td>Epik 7</td>
+                    <td><input type="number" class="epic-min" min="0" value="0"></td>
+                    <td><input type="number" class="epic-max" min="0" value="0"></td>
+                </tr>
+                <tr>
+                    <td>Epik 8</td>
+                    <td><input type="number" class="epic-min" min="0" value="0"></td>
+                    <td><input type="number" class="epic-max" min="0" value="0"></td>
+                </tr>
+                <tr>
+                    <td>Epik 9</td>
+                    <td><input type="number" class="epic-min" min="0" value="0"></td>
+                    <td><input type="number" class="epic-max" min="0" value="0"></td>
+                </tr>
+                <tr>
+                    <td>Epik 10</td>
+                    <td><input type="number" class="epic-min" min="0" value="0"></td>
+                    <td><input type="number" class="epic-max" min="0" value="0"></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <button class="btn btn-secondary" onclick="addMoreEpics()">Dodaj więcej epików</button>
+    </div>
+    
+    <div class="container">
+        <h2>Dostosowanie Capacity Miesięcznego</h2>
+        <p>Wybierz capacity zespołu dla poszczególnych miesięcy (domyślnie 100%):</p>
+        
+        <div class="capacity-grid" id="capacityGrid">
+            <!-- Dynamicznie generowane na podstawie dat -->
+        </div>
+    </div>
+    
+    <div class="container">
+        <button class="btn" onclick="runSimulation()">Uruchom Symulację Monte Carlo</button>
+    </div>
+    
+    <div class="container" id="resultsContainer" style="display: none;">
+        <h2>Wyniki Symulacji</h2>
+        
+        <div class="results">
+            <h3>Prognozy Ukończenia Wszystkich Epików</h3>
+            
+            <div class="result-item">
+                <div class="result-label">Percentyl 50% (Mediana):</div>
+                <div class="result-value" id="result50"></div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-label">Percentyl 85% (Wysoka pewność):</div>
+                <div class="result-value" id="result85"></div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-label">Percentyl 95% (Bardzo wysoka pewność):</div>
+                <div class="result-value" id="result95"></div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-label">Całkowita liczba historyjek (zakres):</div>
+                <div class="result-value" id="totalStories"></div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="forecastChart"></canvas>
+        </div>
+    </div>
+    
+    <script>
+        let epicCounter = 10;
+        let capacityMonths = [];
+        
+        // Inicjalizacja capacity grid
+        function initializeCapacityGrid() {
+            const startDate = new Date(document.getElementById('startDate').value);
+            const grid = document.getElementById('capacityGrid');
+            grid.innerHTML = '';
+            capacityMonths = [];
+            
+            // Generuj następne 12 miesięcy
+            for (let i = 0; i < 12; i++) {
+                const month = new Date(startDate);
+                month.setMonth(month.getMonth() + i);
+                const monthName = month.toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' });
+                
+                const div = document.createElement('div');
+                div.className = 'capacity-item';
+                div.innerHTML = `
+                    <label>${monthName}</label>
+                    <select class="capacity-select" data-month="${i}">
+                        <option value="1.00" selected>100%</option>
+                        <option value="0.75">75%</option>
+                        <option value="0.50">50%</option>
+                        <option value="0.25">25%</option>
+                    </select>
+                `;
+                grid.appendChild(div);
+                capacityMonths.push({ month: month, capacity: 1.0 });
+            }
+        }
+        
+        // Dodaj więcej epików
+        function addMoreEpics() {
+            const tbody = document.getElementById('epicsTableBody');
+            const newRow = tbody.insertRow();
+            epicCounter++;
+            
+            newRow.innerHTML = `
+                <td>Epik ${epicCounter}</td>
+                <td><input type="number" class="epic-min" min="0" value="0"></td>
+                <td><input type="number" class="epic-max" min="0" value="0"></td>
+            `;
+        }
+        
+        // Funkcja do parsowania historycznego velocity
+        function parseVelocity(velocityString) {
+            return velocityString.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v) && v > 0);
+        }
+        
+        // Funkcja do generowania velocity z rozkładu (sampling z historii)
+        function generateVelocity(historicalVelocity, teamFocus) {
+            // Losowe próbkowanie z historycznych danych
+            const randomIndex = Math.floor(Math.random() * historicalVelocity.length);
+            return historicalVelocity[randomIndex] * teamFocus;
+        }
+        
+        // Funkcja do obliczania capacity dla danego sprintu
+        function getCapacityForSprint(sprintStartDate) {
+            const month = sprintStartDate.getMonth();
+            const year = sprintStartDate.getFullYear();
+            
+            // Znajdź capacity dla tego miesiąca
+            for (let i = 0; i < capacityMonths.length; i++) {
+                const capMonth = capacityMonths[i].month;
+                if (capMonth.getMonth() === month && capMonth.getFullYear() === year) {
+                    const select = document.querySelector(`[data-month="${i}"]`);
+                    return parseFloat(select.value);
+                }
+            }
+            return 1.0; // Domyślnie 100%
+        }
+        
+        // Symulacja jednego scenariusza
+        function simulateScenario(totalStories, historicalVelocity, teamFocus, startDate, sprintLengthDays) {
+            let storiesCompleted = 0;
+            let currentDate = new Date(startDate);
+            let sprintCount = 0;
+            
+            while (storiesCompleted < totalStories) {
+                const baseVelocity = generateVelocity(historicalVelocity, teamFocus);
+                const capacity = getCapacityForSprint(currentDate);
+                const adjustedVelocity = Math.max(1, Math.round(baseVelocity * capacity));
+                
+                storiesCompleted += adjustedVelocity;
+                currentDate = new Date(currentDate.getTime() + sprintLengthDays * 24 * 60 * 60 * 1000);
+                sprintCount++;
+                
+                // Zabezpieczenie przed nieskończoną pętlą w przypadku błędnych danych wejściowych
+                // (np. velocity = 0 lub bardzo duża liczba historyjek).
+                // 1000 sprintów to ~38 lat przy 2-tygodniowych sprintach - wystarczająco długo dla realnych projektów
+                if (sprintCount > 1000) break;
+            }
+            
+            return currentDate;
+        }
+        
+        // Główna funkcja symulacji
+        function runSimulation() {
+            // Pobierz parametry
+            const startDate = new Date(document.getElementById('startDate').value);
+            const sprintWeeks = parseInt(document.getElementById('sprintWeeks').value);
+            const sprintLengthDays = sprintWeeks * 7;
+            const teamFocus = parseFloat(document.getElementById('teamFocus').value);
+            const velocityString = document.getElementById('historicalVelocity').value;
+            const historicalVelocity = parseVelocity(velocityString);
+            
+            if (historicalVelocity.length === 0) {
+                alert('Wprowadź historyczne dane velocity (liczby oddzielone przecinkami)');
+                return;
+            }
+            
+            // Pobierz epiki
+            const minInputs = document.querySelectorAll('.epic-min');
+            const maxInputs = document.querySelectorAll('.epic-max');
+            let epics = [];
+            
+            for (let i = 0; i < minInputs.length; i++) {
+                const min = parseInt(minInputs[i].value) || 0;
+                const max = parseInt(maxInputs[i].value) || 0;
+                if (min > 0 || max > 0) {
+                    epics.push({ min: min, max: max });
+                }
+            }
+            
+            if (epics.length === 0) {
+                alert('Wprowadź przynajmniej jeden epik z estymacją');
+                return;
+            }
+            
+            // Uruchom symulację Monte Carlo
+            const numSimulations = 1000;
+            let completionDates = [];
+            
+            for (let sim = 0; sim < numSimulations; sim++) {
+                // Dla każdego epiku losuj liczbę historyjek między min a max
+                let totalStories = 0;
+                for (let epic of epics) {
+                    const stories = Math.floor(Math.random() * (epic.max - epic.min + 1)) + epic.min;
+                    totalStories += stories;
+                }
+                
+                // Symuluj dostarczenie
+                const completionDate = simulateScenario(totalStories, historicalVelocity, teamFocus, startDate, sprintLengthDays);
+                completionDates.push(completionDate);
+            }
+            
+            // Sortuj daty
+            completionDates.sort((a, b) => a - b);
+            
+            // Oblicz percentyle
+            const p50Index = Math.floor(numSimulations * 0.50);
+            const p85Index = Math.floor(numSimulations * 0.85);
+            const p95Index = Math.floor(numSimulations * 0.95);
+            
+            const p50Date = completionDates[p50Index];
+            const p85Date = completionDates[p85Index];
+            const p95Date = completionDates[p95Index];
+            
+            // Oblicz zakres historyjek
+            const minStories = epics.reduce((sum, epic) => sum + epic.min, 0);
+            const maxStories = epics.reduce((sum, epic) => sum + epic.max, 0);
+            
+            // Wyświetl wyniki
+            document.getElementById('result50').textContent = p50Date.toLocaleDateString('pl-PL');
+            document.getElementById('result85').textContent = p85Date.toLocaleDateString('pl-PL');
+            document.getElementById('result95').textContent = p95Date.toLocaleDateString('pl-PL');
+            document.getElementById('totalStories').textContent = `${minStories} - ${maxStories} historyjek`;
+            
+            document.getElementById('resultsContainer').style.display = 'block';
+            
+            // Przygotuj dane do wykresu
+            const dateCounts = {};
+            completionDates.forEach(date => {
+                const dateStr = date.toLocaleDateString('pl-PL');
+                dateCounts[dateStr] = (dateCounts[dateStr] || 0) + 1;
+            });
+            
+            const labels = Object.keys(dateCounts).sort((a, b) => {
+                const dateA = new Date(a.split('.').reverse().join('-'));
+                const dateB = new Date(b.split('.').reverse().join('-'));
+                return dateA - dateB;
+            });
+            
+            const data = labels.map(label => dateCounts[label]);
+            
+            // Narysuj wykres
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            
+            // Usuń poprzedni wykres jeśli istnieje
+            if (window.forecastChartInstance) {
+                window.forecastChartInstance.destroy();
+            }
+            
+            window.forecastChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Liczba scenariuszy',
+                        data: data,
+                        backgroundColor: 'rgba(5, 76, 142, 0.6)',
+                        borderColor: 'rgba(5, 76, 142, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Rozkład Dat Ukończenia (${numSimulations} scenariuszy Monte Carlo)`,
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            color: '#054C8E'
+                        },
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Liczba scenariuszy'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Data ukończenia'
+                            },
+                            ticks: {
+                                maxRotation: 90,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Przewiń do wyników
+            document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Inicjalizacja po załadowaniu strony
+        window.addEventListener('DOMContentLoaded', function() {
+            initializeCapacityGrid();
+            
+            // Odśwież capacity grid gdy zmieni się data rozpoczęcia
+            document.getElementById('startDate').addEventListener('change', initializeCapacityGrid);
+        });
+    </script>
+</body>
+</html>
