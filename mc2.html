@@ -496,7 +496,9 @@
                 currentDate = new Date(currentDate.getTime() + sprintLengthDays * 24 * 60 * 60 * 1000);
                 sprintCount++;
                 
-                // Zabezpieczenie przed nieskończoną pętlą
+                // Zabezpieczenie przed nieskończoną pętlą w przypadku błędnych danych wejściowych
+                // (np. velocity = 0 lub bardzo duża liczba historyjek).
+                // 1000 sprintów to ~38 lat przy 2-tygodniowych sprintach - wystarczająco długo dla realnych projektów
                 if (sprintCount > 1000) break;
             }
             
