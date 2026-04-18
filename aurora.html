@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora - AI Assistant Case Study</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #1D1D1B;
+        }
+        
+        .header {
+            background-color: #054C8E;
+            color: white;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(5, 76, 142, 0.2);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            max-height: 80px;
+            width: auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+        }
+        
+        .nav {
+            background-color: #ffffff;
+            padding: 15px 20px;
+            margin: 0 20px 30px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .nav a {
+            text-decoration: none;
+            color: #054C8E;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav a:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .content-section {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 20px 30px 20px;
+        }
+        
+        .content-section h2 {
+            margin-top: 0;
+            color: #054C8E;
+            border-bottom: 3px solid #054C8E;
+            padding-bottom: 10px;
+        }
+        
+        .content-section h3 {
+            color: #054C8E;
+            margin-top: 20px;
+        }
+        
+        .prompt-box {
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #054C8E;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+        
+        .info-box {
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #054C8E;
+        }
+        
+        .risk-item {
+            background-color: #fff3cd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .artifact-box {
+            background-color: #d4edda;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .defense-section {
+            background-color: #cce5ff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #004085;
+        }
+        
+        ul {
+            line-height: 1.8;
+        }
+        
+        .label {
+            font-weight: bold;
+            color: #054C8E;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <img src="2.jpg.png" alt="Logo" class="logo">
+            <h1>Aurora - AI Assistant Case Study</h1>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <a href="index.html">← Histogram</a>
+        <a href="scatter.html">Scatterplot</a>
+        <a href="PCB.html">Wykres X (PCB)</a>
+        <a href="XMR.html">Wykres XMR</a>
+        <a href="mc1.html">Monte Carlo 1</a>
+        <a href="mc2.html">Monte Carlo 2</a>
+    </div>
+    
+    <div class="content-section">
+        <h2>🎯 Cel Case Study</h2>
+        <p>Na podstawie analizy rynku mebli i wyposażenia wnętrz dla grupy typu DomoLinea w Polsce i CEE, przygotowanie kompleksowej dokumentacji projektu oraz rekomendacji dotyczących wdrożenia specjalistycznego asystenta AI.</p>
+    </div>
+    
+    <div class="content-section">
+        <h2>📋 Prompt: Generowanie Project Situation Brief (PSB)</h2>
+        <div class="prompt-box">Jesteś ekspertem ds. analizy biznesowej i strategii cyfrowej. Na podstawie poniższych danych:
+
+<span class="label">Źródła danych:</span>
+- Market Analysis for DomoLinea-type interior furnishings group in Poland and CEE
+- Historyczne dane sprzedażowe i operacyjne
+- Analiza konkurencji w segmencie mebli i wyposażenia wnętrz
+- Trendy w e-commerce i omnichannel w CEE
+
+<span class="label">Zadanie:</span>
+Przygotuj 2-stronicowy Project Situation Brief po etapie Research, który zawiera:
+
+1. <span class="label">Executive Summary (0.5 strony):</span>
+   - Kontekst biznesowy: rynek mebli i wyposażenia wnętrz w Polsce/CEE
+   - Kluczowe wyzwania: zarządzanie backlogiem, prognozowanie dostarczania
+   - Główny cel: optymalizacja procesów planowania i realizacji projektów
+
+2. <span class="label">Research Findings (1 strona):</span>
+   - Analiza obecnych procesów planowania (Monte Carlo simulations)
+   - Identyfikacja bottlenecków w delivery
+   - Benchmarking konkurencji w obszarze digital transformation
+   - Potrzeby klientów i stakeholders
+
+3. <span class="label">Rekomendacje wstępne (0.5 strony):</span>
+   - Obszary do automatyzacji i wsparcia AI
+   - Proponowane rozwiązania technologiczne
+   - Next steps i timeline
+
+<span class="label">Format:</span> Profesjonalny dokument biznesowy, język polski, orientacja krajobrazowa, maksymalnie 2 strony A4.</div>
+    </div>
+    
+    <div class="content-section">
+        <h2>🤖 Opis Wyspecjalizowanego Asystenta AI</h2>
+        
+        <h3>Nazwa: Aurora - Planning & Delivery Intelligence Assistant</h3>
+        
+        <div class="info-box">
+            <p><span class="label">Specjalizacja:</span> Automatyczne prognozowanie czasu realizacji projektów i optymalizacja backlogu w branży meblarskiej/wyposażenia wnętrz.</p>
+            
+            <p><span class="label">Główne funkcjonalności:</span></p>
+            <ul>
+                <li>Analiza historycznych danych velocity i generowanie prognoz Monte Carlo</li>
+                <li>Automatyczne wykrywanie anomalii w tempie dostarczania</li>
+                <li>Rekomendacje priorytetyzacji elementów backlogu</li>
+                <li>Wsparcie decision-making dla project managers i stakeholders</li>
+                <li>Generowanie raportów i wizualizacji dla różnych poziomów zarządzania</li>
+            </ul>
+            
+            <p><span class="label">Technologie:</span> Machine Learning (prognozowanie), Natural Language Processing (analiza wymagań), Data Visualization (Chart.js), Monte Carlo Simulation</p>
+        </div>
+        
+        <h3>Przykład Zastosowania</h3>
+        
+        <div class="info-box">
+            <p><strong>Scenariusz:</strong> Firma DomoLinea planuje wdrożenie nowego modułu e-commerce z backlogiem 62 elementów.</p>
+            
+            <p><strong>Pytanie biznesowe:</strong> "Kiedy będziemy gotowi na launch przed sezonem jesiennym (do 31 sierpnia 2026)?"</p>
+            
+            <p><strong>Działanie Aurora:</strong></p>
+            <ol>
+                <li>Analizuje historyczne velocity z ostatnich 11 sprintów: [5, 4, 4, 5, 6, 4, 2, 3, 2, 5, 6]</li>
+                <li>Przeprowadza 1000 symulacji Monte Carlo uwzględniając naturalną zmienność</li>
+                <li>Generuje prognozy z różnymi poziomami pewności (percentyle 15%, 50%, 85%)</li>
+                <li>Wizualizuje rozkłady prawdopodobieństwa ukończenia</li>
+            </ol>
+            
+            <p><strong>Rezultat:</strong></p>
+            <ul>
+                <li>Mediana dostarczenia 62 elementów: ~połowa października 2026</li>
+                <li>Do końca sierpnia 2026 (50% pewności): ~45-48 elementów</li>
+                <li>85% pewności dostarczenia 53 elementów (85% backlogu): ~początek października</li>
+            </ul>
+            
+            <p><strong>Rekomendacja Aurora:</strong> Przy obecnym tempie dostarczania, termin 31 sierpnia jest nieosiągalny dla pełnego scope. Zaproponowano:</p>
+            <ul>
+                <li>Opcja A: Redukcja scope do 48 MVP features</li>
+                <li>Opcja B: Zwiększenie zespołu / velocity o ~30%</li>
+                <li>Opcja C: Przesunięcie launch date na październik z pełnym scope</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="content-section">
+        <h2>😠 Wynik Pracy "Smerfa Marudy" - Analiza Krytyczna</h2>
+        
+        <h3>Lista Luk, Ryzyk i Podważonych Założeń</h3>
+        
+        <div class="risk-item">
+            <p><strong>Luka #1: Brak danych jakościowych</strong></p>
+            <p>Symulacje opierają się wyłącznie na historycznej velocity bez uwzględnienia:</p>
+            <ul>
+                <li>Złożoności poszczególnych tasków</li>
+                <li>Dostępności kluczowych zasobów (eksperci, infrastruktura)</li>
+                <li>Zależności między elementami backlogu</li>
+            </ul>
+            <p><strong>Implikacja:</strong> Prognozy mogą być zbyt optymistyczne dla złożonych features.</p>
+        </div>
+        
+        <div class="risk-item">
+            <p><strong>Ryzyko #1: Założenie stacjonarności procesu</strong></p>
+            <p>Symulacja zakłada, że przyszłe velocity będzie miało podobny rozkład jak historyczne dane. To podważone przez:</p>
+            <ul>
+                <li>Możliwe zmiany w składzie zespołu</li>
+                <li>Efekty uczenia się (velocity może rosnąć)</li>
+                <li>Technical debt (velocity może spadać)</li>
+                <li>Sezonowość (urlopy, święta)</li>
+            </ul>
+            <p><strong>Implikacja:</strong> Należy regularnie aktualizować model nowymi danymi.</p>
+        </div>
+        
+        <div class="risk-item">
+            <p><strong>Luka #2: Brak analizy zewnętrznych zależności</strong></p>
+            <p>Nie uwzględniono:</p>
+            <ul>
+                <li>Integracji z systemami zewnętrznymi (ERP, payment gateways)</li>
+                <li>Zależności od dostawców technologii (API vendors)</li>
+                <li>Compliance i certyfikacje (RODO, PCI DSS)</li>
+            </ul>
+            <p><strong>Implikacja:</strong> Realny timeline może być dłuższy.</p>
+        </div>
+        
+        <div class="risk-item">
+            <p><strong>Ryzyko #2: Overconfidence w AI predictions</strong></p>
+            <p>Zespoły mogą nadmiernie polegać na prognozach AI bez:</p>
+            <ul>
+                <li>Weryfikacji założeń</li>
+                <li>Uwzględnienia zmian w kontekście biznesowym</li>
+                <li>Human judgment dla nietypowych sytuacji</li>
+            </ul>
+            <p><strong>Implikacja:</strong> Potrzebny mechanizm human-in-the-loop.</p>
+        </div>
+        
+        <div class="risk-item">
+            <p><strong>Podważone Założenie #1: Równomierne elementy backlogu</strong></p>
+            <p>Model zakłada że wszystkie elementy są podobnej wielkości (1 element = 1 user story).</p>
+            <p><strong>Rzeczywistość:</strong> W praktyce różnica między małą zmianą a dużym feature może być 10x.</p>
+            <p><strong>Implikacja:</strong> Należy normalizować backlog (story points, T-shirt sizing).</p>
+        </div>
+        
+        <div class="risk-item">
+            <p><strong>Podważone Założenie #2: Niezależność elementów</strong></p>
+            <p>Model nie uwzględnia że niektóre features muszą być dostarczone sekwencyjnie (np. fundament przed UI).</p>
+            <p><strong>Implikacja:</strong> Może prowadzić do nierealistycznych scenariuszy.</p>
+        </div>
+        
+        <div class="risk-item">
+            <p><strong>Luka #3: Brak metryk biznesowych</strong></p>
+            <p>Fokus tylko na "kiedy zakończymy", brak:</p>
+            <ul>
+                <li>Wartości biznesowej poszczególnych features</li>
+                <li>Cost of delay</li>
+                <li>ROI analysis</li>
+            </ul>
+            <p><strong>Implikacja:</strong> Możliwe suboptymalne decyzje priorytetyzacji.</p>
+        </div>
+    </div>
+    
+    <div class="content-section">
+        <h2>🎨 Artefakt: Enhanced Planning Dashboard Prototype</h2>
+        
+        <div class="artifact-box">
+            <h3>Rekomendowane Rozwiązanie: Intelligent Planning Dashboard 2.0</h3>
+            
+            <p><strong>Główne Ulepszenia vs. Obecne Dashboardy:</strong></p>
+            
+            <ol>
+                <li><strong>Risk-Adjusted Forecasting</strong>
+                    <ul>
+                        <li>Dodatkowa warstwa uncertainty quantification</li>
+                        <li>Wskaźniki confidence dla każdej prognozy</li>
+                        <li>Alert system dla rozbieżności plan vs. actual</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Interactive Scenario Planning</strong>
+                    <ul>
+                        <li>What-if analysis: "Co jeśli usuniemy 10 najmniej wartościowych features?"</li>
+                        <li>Resource allocation optimizer</li>
+                        <li>Impact simulator dla zmian w velocity</li>
+                    </ul>
+                </li>
+                
+                <li><strong>Value Stream Visualization</strong>
+                    <ul>
+                        <li>Feature value scoring (business value vs. effort)</li>
+                        <li>Dependency mapping (critical path visualization)</li>
+                        <li>WSJF (Weighted Shortest Job First) recommendations</li>
+                    </ul>
+                </li>
+                
+                <li><strong>AI-Powered Insights</strong>
+                    <ul>
+                        <li>Automatyczne wykrywanie trendów i anomalii</li>
+                        <li>Natural language query: "Czy zdążymy z MVP do Q3?"</li>
+                        <li>Proactive risk alerts przed sprint planning</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <p><strong>Mockup Components:</strong></p>
+            <ul>
+                <li>📊 Monte Carlo Forecast Chart (as baseline - już istnieje)</li>
+                <li>🎯 Confidence Meter (nowy): Real-time confidence level</li>
+                <li>🔀 Scenario Comparator (nowy): Side-by-side what-if scenarios</li>
+                <li>⚠️ Risk Dashboard (nowy): Top 5 risks with mitigation suggestions</li>
+                <li>💎 Value Heatmap (nowy): Feature priority matrix</li>
+                <li>🗣️ AI Chat Interface (nowy): Natural language interaction</li>
+            </ul>
+            
+            <p><strong>Techniczny Stack:</strong></p>
+            <ul>
+                <li>Frontend: Chart.js (enhanced), D3.js (advanced viz), React/Vue</li>
+                <li>Backend: Python (FastAPI), NumPy/Pandas (calculations)</li>
+                <li>AI/ML: Scikit-learn (models), OpenAI API (NLP)</li>
+                <li>Data: PostgreSQL (history), Redis (real-time)</li>
+            </ul>
+        </div>
+        
+        <h3>Prototyp - Nowy Feature: Confidence Score</h3>
+        
+        <div style="background-color: white; padding: 20px; border-radius: 8px; border: 2px solid #054C8E;">
+            <h4 style="color: #054C8E; margin-top: 0;">Forecast Confidence Meter</h4>
+            
+            <div style="margin: 20px 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span><strong>Overall Confidence:</strong></span>
+                    <span style="color: #ffc107; font-weight: bold; font-size: 24px;">⚠️ 67%</span>
+                </div>
+                
+                <div style="background-color: #e0e0e0; height: 30px; border-radius: 15px; overflow: hidden;">
+                    <div style="background: linear-gradient(to right, #dc3545 0%, #ffc107 50%, #28a745 100%); width: 67%; height: 100%; transition: width 0.5s;"></div>
+                </div>
+            </div>
+            
+            <div style="background-color: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107;">
+                <p style="margin: 0; font-weight: bold;">⚠️ Czynniki obniżające pewność:</p>
+                <ul style="margin: 10px 0 0 0;">
+                    <li>Duża zmienność velocity w ostatnich 5 sprintach (σ = 1.52)</li>
+                    <li>Backlog zawiera 3 epiki bez szczegółowego breakdown</li>
+                    <li>Brak danych o dostępności kluczowych developerów w Q3</li>
+                </ul>
+            </div>
+            
+            <div style="margin-top: 15px; padding: 15px; background-color: #d4edda; border-radius: 6px; border-left: 4px solid #28a745;">
+                <p style="margin: 0; font-weight: bold;">✅ Rekomendacje Aurora:</p>
+                <ul style="margin: 10px 0 0 0;">
+                    <li>Przeprowadź refinement session dla nieokreślonych epików</li>
+                    <li>Zbierz dodatkowe 2-3 sprinty danych dla stabilniejszej prognozy</li>
+                    <li>Dodaj buffer 15% na scope creep i nieprzewidziane zmiany</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="content-section">
+        <h2>🎤 3-5 Minutowa Obrona Rekomendacji</h2>
+        
+        <div class="defense-section">
+            <h3>Struktura Prezentacji dla Stakeholders</h3>
+            
+            <p><strong>⏱️ Minuta 1: Problem Statement</strong></p>
+            <ul>
+                <li>"Obecnie planowanie delivery opiera się na intuicji i spreadsheetach"</li>
+                <li>"To prowadzi do overpromise & underdeliver - 60% projektów przekracza deadline"</li>
+                <li>"Kosztuje nas to utratę zaufania klientów i missed opportunities"</li>
+            </ul>
+            
+            <p><strong>⏱️ Minuta 2: Data-Driven Insight</strong></p>
+            <ul>
+                <li>"Przeanalizowaliśmy 11 sprintów i 1000 symulacji Monte Carlo"</li>
+                <li>"Odkryliśmy że nasza velocity ma σ=1.52 - wysoka nieprzewidywalność"</li>
+                <li>"DEMONSTRACJA: [Pokazać histogram z mc1.html]"</li>
+                <li>"Bez zmian: 85% szans że 62-elementowy projekt zajmie 4-5 miesięcy, nie 3"</li>
+            </ul>
+            
+            <p><strong>⏱️ Minuta 3: Rozwiązanie - Aurora AI Assistant</strong></p>
+            <ul>
+                <li>"Proponuję wdrożenie Aurora - AI Planning Assistant"</li>
+                <li>"Automatyczna analiza velocity + ML predictions + interactive what-if scenarios"</li>
+                <li>"DEMONSTRACJA: [Pokazać Confidence Meter prototype]"</li>
+                <li>"Real-time visibility + proactive risk alerts + optimal priorytetyzacja"</li>
+            </ul>
+            
+            <p><strong>⏱️ Minuta 4: Business Case</strong></p>
+            <ul>
+                <li>"Koszt wdrożenia: ~3 miesiące dev work + infrastruktura"</li>
+                <li>"ROI: 20-30% redukcja deadline misses → mniej penalty clauses"</li>
+                <li>"Better stakeholder communication → wyższe satisfaction scores"</li>
+                <li>"Data-driven culture → lepsze decyzje strategiczne"</li>
+            </ul>
+            
+            <p><strong>⏱️ Minuta 5: Call to Action & Next Steps</strong></p>
+            <ul>
+                <li>"Rekomendacja: Pilot na 1 projekcie w Q3 2026"</li>
+                <li>"Phase 1 (4 tygodnie): Enhanced dashboard z confidence scoring"</li>
+                <li>"Phase 2 (8 tygodni): AI-powered insights + NLP interface"</li>
+                <li>"Success metrics: Forecast accuracy, stakeholder satisfaction, velocity stability"</li>
+                <li>"<strong>Pytanie do stakeholders: Czy możemy przeznaczyć 1 dedykowany zespół na ten pilot?</strong>"</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h4>Anticipated Q&A:</h4>
+            
+            <p><strong>Q: "Czy to nie over-engineering? Po co AI dla prostego planowania?"</strong></p>
+            <p>A: "Aurora to nie tylko AI hype - to systematyzacja tego co robią najlepsi PMs intuicyjnie. Plus automatyzacja 80% manual work w reportingu. W skali organizacji to setki godzin oszczędności rocznie."</p>
+            
+            <p><strong>Q: "Co jeśli AI się pomyli? Kto ponosi odpowiedzialność?"</strong></p>
+            <p>A: "Aurora to decision support tool, nie autopilot. Finalne decyzje zawsze należą do PM/stakeholders. Plus: confidence scoring pokazuje poziom pewności - dla low-confidence predictions zalecamy human review."</p>
+            
+            <p><strong>Q: "Dlaczego nie kupić gotowego rozwiązania jak Jira Advanced Roadmaps?"</strong></p>
+            <p>A: "Rozważaliśmy. Aurora oferuje: 1) Customization dla naszych unikalnych procesów, 2) Integrację z naszym legacy systems, 3) Monte Carlo z naszym historycznym velocity - nie generic assumptions. ROI better dla mid-term."</p>
+        </div>
+    </div>
+    
+    <div class="content-section" style="background-color: #e8f5e9;">
+        <h2>📌 Podsumowanie</h2>
+        <p>Aurora AI Assistant to odpowiedź na kluczowe wyzwania planowania i dostarczania w branży meblarskiej/wyposażenia wnętrz. Łączy data-driven forecasting (Monte Carlo), machine learning predictions, i intuitive UX w jedno narzędzie decision support dla teams i stakeholders.</p>
+        
+        <p><strong>Kluczowe wartości:</strong></p>
+        <ul>
+            <li>✅ <strong>Transparency:</strong> Każda prognoza z confidence level i underlying assumptions</li>
+            <li>✅ <strong>Actionable insights:</strong> Nie tylko "co", ale "dlaczego" i "co zrobić"</li>
+            <li>✅ <strong>Continuous learning:</strong> Model się doskonali z każdym sprintem</li>
+            <li>✅ <strong>Human-centric:</strong> Augments human judgment, nie zastępuje go</li>
+        </ul>
+        
+        <p style="margin-top: 30px; padding: 20px; background-color: white; border-radius: 8px; border-left: 4px solid #054C8E;">
+            <strong>Next Step:</strong> Decyzja o pilotażu i alokacji zespołu na development Aurory w Q3 2026.
+        </p>
+    </div>
+    
+</body>
+</html>
